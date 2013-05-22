@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import airplane.g2.PlanePair;
 import airplane.sim.Plane;
+import java.awt.geom.Line2D;
 
 public class PlaneUtil {
 	/**
@@ -148,7 +149,5 @@ public class PlaneUtil {
 			}
 		}
 		return collisionPairs;
-	}
-	
-	
+	}	
 }
