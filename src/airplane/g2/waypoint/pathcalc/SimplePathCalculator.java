@@ -8,6 +8,7 @@ import airplane.sim.Plane;
 
 public class SimplePathCalculator extends PathCalculator{
 
+	//TODO Better method of adding waypoint.
 	@Override
 	public void calculatePaths(HashMap<Plane, PlanePath> waypointHash) {
 		int i = 1;

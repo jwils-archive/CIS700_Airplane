@@ -1,8 +1,6 @@
 package airplane.g2.waypoint;
 
-import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
@@ -82,6 +80,7 @@ public class PlanePath {
 	}
 	
 	
+	//TODO Get this working.
 	private void smoothCurves() {
 		int currentIndex = 1;
 		while (currentIndex < waypoints.size() - 1) {
