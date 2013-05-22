@@ -10,7 +10,7 @@ import airplane.sim.SimulationResult;
 
 public class Group2Player extends airplane.sim.Player {	
 	private Logger logger = Logger.getLogger(this.getClass()); // for logging
-	
+
 	@Override
 	public String getName() {
 		return "Group 2";
@@ -105,6 +105,13 @@ public class Group2Player extends airplane.sim.Player {
 		return true;
 	}
 	
+	/**
+	 * Use to determine whether there was a plane crash in the future and whether
+	 * it is too far into the future to consider.
+	 * @param result
+	 * @param round
+	 * @return
+	 */
 	protected Boolean simulationCrashTooFarIntoFuture(SimulationResult result, int round) {
 		return result.getReason() == SimulationResult.TOO_CLOSE && 
 				result.getRound() - round > 20;
@@ -128,11 +135,8 @@ public class Group2Player extends airplane.sim.Player {
 		if(isAwaitingTakeoff(oldBearing)) return bearing;
 		if (Math.abs(bearing - oldBearing) <= cap) return bearing;
 		
-		if (oldBearing > bearing) {
-			return normalizedBearing(oldBearing - cap);
-		} else {
-			return normalizedBearing(oldBearing + cap);
-		}	
+		int sign = oldBearing > bearing ? -1 : 1;
+		return normalizedBearing(oldBearing + sign * cap);	
 	}
 	
 	protected Boolean isAwaitingTakeoff(double bearing) {
@@ -172,7 +176,6 @@ public class Group2Player extends airplane.sim.Player {
 	}
 	
 	double getVeerBearing(Plane plane, Plane toAvoid) {
-		//TODO
-		return 10;
+		return 9.9;
 	}
 }
