@@ -61,8 +61,12 @@ public class Group2Player extends airplane.sim.Player {
 		if (p.getDepartureTime() == round) {
 			bearings[indexOfStepsToDestination] = calculateBearingToDestination(p);
 		} else if(p.getDepartureTime() < round) {
-			bearings[indexOfStepsToDestination] = p.getBearing() + getVeerBearing(null, null);
+			bearings[indexOfStepsToDestination] = normalizedBearing(p.getBearing() + getVeerBearing(null, null));
 		}
+	}
+	
+	protected double normalizedBearing(double bearing) {
+		return (bearing + 360) % 360;
 	}
 	
 	protected void updatePlanesAfterSimulationFailure(ArrayList<Plane> planes, int round,
@@ -73,7 +77,7 @@ public class Group2Player extends airplane.sim.Player {
 		
 		for (int i = 0; i < planes.size(); i++) {
 			if (i != indexOfStepsToDestination) {
-				bearings[i] = calculateBearingWithCap(planes.get(i), bearings[i]);
+				bearings[i] = calculateBearingWithCap(planes.get(i));
 			}
 		}
 	}
@@ -82,10 +86,7 @@ public class Group2Player extends airplane.sim.Player {
 	public double[] updatePlanes(ArrayList<Plane> planes, int round,
 			double[] bearings) {
 		
-		SimulationResult result = startSimulation(planes, round);
-		
-		logger.info(String.format("Simulation %s", result.isSuccess() ?  "succeeded" : "failed"));
-		if (result.isSuccess()) {
+		if (!shouldVeerPlanes(planes, round)) {
 			updatePlanesAfterSimulationSuccess(planes, round, bearings);
 		} else {
 			updatePlanesAfterSimulationFailure(planes, round, bearings);
@@ -93,6 +94,22 @@ public class Group2Player extends airplane.sim.Player {
 		
 		return bearings;
 	}
+	
+	protected Boolean shouldVeerPlanes(ArrayList<Plane> planes, int round) {
+		SimulationResult result = startSimulation(planes, round);
+		
+		logger.info(String.format("Simulation %s", result.isSuccess() ?  "succeeded" : "failed"));
+		if(result.isSuccess()) return false;
+		if(simulationCrashTooFarIntoFuture(result, round)) return false;
+
+		return true;
+	}
+	
+	protected Boolean simulationCrashTooFarIntoFuture(SimulationResult result, int round) {
+		return result.getReason() == SimulationResult.TOO_CLOSE && 
+				result.getRound() - round > 20;
+	}
+	
 	protected double getBearingCap() {
 		return 10.0;
 	}
@@ -112,9 +129,9 @@ public class Group2Player extends airplane.sim.Player {
 		if (Math.abs(bearing - oldBearing) <= cap) return bearing;
 		
 		if (oldBearing > bearing) {
-			return (oldBearing - cap + 360) % 360;
+			return normalizedBearing(oldBearing - cap);
 		} else {
-			return (oldBearing + cap) % 360;
+			return normalizedBearing(oldBearing + cap);
 		}	
 	}
 	
@@ -148,7 +165,7 @@ public class Group2Player extends airplane.sim.Player {
 			}
 			
 			// mid-flight
-			bearings[i] = calculateBearingWithCap(p, 10);
+			bearings[i] = calculateBearingWithCap(p, getBearingCap());
 		}	
 		
 		return bearings;
