@@ -24,8 +24,12 @@ public class Group2WaypointPlayer extends airplane.sim.Player {
 	@Override
 	public void startNewGame(ArrayList<Plane> planes) {
 		waypointHash = new HashMap<Plane, PlanePath>();
+		int id = 0;
+		
 		for (Plane plane : planes) {
 			waypointHash.put(plane, new PlanePath(plane));
+			plane.id = id;
+			id++;
 		}
 		pathCalculator.calculatePaths(waypointHash);
 		for (Plane plane : planes) {
