@@ -174,10 +174,10 @@ public class PlaneUtil {
 	}
 	
 	public static Boolean planesAreEqual(Plane a, Plane b) {
-		Point2D.Double origA = planeOrigin(a);
-		Point2D.Double origB = planeOrigin(b);
-		return a.getDestination().equals(b.getDestination()) &&
-				((origA == null && origB == null) || (origA != null && origA.equals(origB))) &&
-				a.getDepartureTime() == b.getDepartureTime();
+		return a.id == b.id;
+	}
+	
+	public static Point2D.Double addPoints(Point2D.Double a, Point2D.Double b) {
+		return new Point2D.Double(a.x + b.x, a.y + b.y);
 	}
 }
