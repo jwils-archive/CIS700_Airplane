@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import airplane.g2.PlanePair;
 import airplane.sim.Plane;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 
 public class PlaneUtil {
 	/**
@@ -135,19 +136,48 @@ public class PlaneUtil {
 	 * @param distanceThreshold
 	 * @return
 	 */
-	public static ArrayList<PlanePair> detectCollisions(ArrayList<Plane> planes, int distanceThreshold) {
+	public static ArrayList<PlanePair> detectCollisions(ArrayList<Plane> planes, double distanceThreshold) {
 		double[][] distances = getDistances(planes);
 		int count = planes.size();
 		ArrayList<PlanePair> collisionPairs = new ArrayList<PlanePair>();
 		for(int i = 0; i < count; i ++) {
-			for(int j = i; j < count; j++) {
+			for(int j = i + 1; j < count; j++) {
 				double dist = distances[i][j];
 				if(dist > distanceThreshold) continue;
 				
-				PlanePair pair = new PlanePair(planes.get(i), planes.get(j), dist);
-				collisionPairs.add(pair);
+				collisionPairs.add(new PlanePair(i, planes.get(i), j, planes.get(j), dist));
 			}
 		}
 		return collisionPairs;
 	}	
+	
+	public static double normalizedBearing(double bearing) {
+		return (bearing + 360) % 360;
+	}
+	
+	public static double bearingAway(Plane planeToAvoid, Plane planeThatAvoids, double deltaBearing) {
+		return bearingAway(planeToAvoid.getBearing(), planeThatAvoids.getBearing(), deltaBearing);
+	}
+	
+	public static double bearingAway(double bearingToAvoid, double currentBearing, double deltaBearing) {
+		double bearingA = normalizedBearing(currentBearing + deltaBearing);
+		double bearingB = normalizedBearing(currentBearing - deltaBearing);
+		
+		double diffA = normalizedBearing(bearingToAvoid - bearingA);
+		double diffB = normalizedBearing(bearingToAvoid - bearingB);
+		
+		return diffA > diffB ? bearingA : bearingB;
+	}
+	
+	public static Point2D.Double planeOrigin(Plane a) {
+		return a.getHistory().isEmpty() ? null : a.getHistory().get(0);
+	}
+	
+	public static Boolean planesAreEqual(Plane a, Plane b) {
+		Point2D.Double origA = planeOrigin(a);
+		Point2D.Double origB = planeOrigin(b);
+		return a.getDestination().equals(b.getDestination()) &&
+				((origA == null && origB == null) || (origA != null && origA.equals(origB))) &&
+				a.getDepartureTime() == b.getDepartureTime();
+	}
 }

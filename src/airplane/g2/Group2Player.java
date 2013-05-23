@@ -10,6 +10,7 @@ import airplane.sim.SimulationResult;
 
 public class Group2Player extends airplane.sim.Player {	
 	private Logger logger = Logger.getLogger(this.getClass()); // for logging
+	protected ArrayList<PlanePair> crashes = new ArrayList<PlanePair>();
 
 	@Override
 	public String getName() {
@@ -55,31 +56,52 @@ public class Group2Player extends airplane.sim.Player {
 		updateDepartedPlanesWithBearingCap(planes, round, bearings);
 	}
 	
-	protected void updateBearingOfPlaneClosestToDestinationWithIndex(int indexOfStepsToDestination, ArrayList<Plane> planes, 
+	protected void updateBearingOfPlaneClosestToDestinationWithIndex(int index, ArrayList<Plane> planes, 
 			int round, double[] bearings) {
-		Plane p = planes.get(indexOfStepsToDestination);	
+		Plane p = planes.get(index);	
 		if (p.getDepartureTime() == round) {
-			bearings[indexOfStepsToDestination] = calculateBearingToDestination(p);
+			bearings[index] = calculateBearingToDestination(p);
 		} else if(p.getDepartureTime() < round) {
-			bearings[indexOfStepsToDestination] = normalizedBearing(p.getBearing() + getVeerBearing(null, null));
+			bearings[index] = bearingForPlaneWithVeer(planes, index);
 		}
 	}
 	
-	protected double normalizedBearing(double bearing) {
-		return (bearing + 360) % 360;
+	protected ArrayList<Integer> planesThatCrashedInto(ArrayList<Plane> planes, int index) {
+		ArrayList<Integer> crashedInto = new ArrayList<Integer>();
+		for(PlanePair pp: crashes) {
+			if(!pp.contains(index)) continue;
+			crashedInto.add(pp.planeNot(index));
+		}
+		return crashedInto;
+	}
+	
+	protected double bearingForPlaneWithVeer(ArrayList<Plane> planes, int index) {
+		// was the plane involved in crashes
+		ArrayList<Integer> crashedInto = planesThatCrashedInto(planes, index);
+		Plane p = planes.get(index);
+		if(crashedInto.isEmpty()) return calculateBearingWithCap(p);
+		
+		// we should have at least one plane
+		Integer crashIndex = crashedInto.get(0);
+		Plane firstPlane = planes.get(crashIndex);
+		
+		return PlaneUtil.normalizedBearing(getVeerBearing(firstPlane, p));
 	}
 	
 	protected void updatePlanesAfterSimulationFailure(ArrayList<Plane> planes, int round,
 			double[] bearings) {
 		
-		int indexOfStepsToDestination = getIndexOfPlaneClosestToDestination(planes);
-		updateBearingOfPlaneClosestToDestinationWithIndex(indexOfStepsToDestination, planes, round, bearings);
+		ArrayList<PlaneInfo> planeData = PlaneInfo.toPlaneInfo(planes);
+		ArrayList<PlaneInfo> sortedPlaneData = PlaneInfo.sortedByStepsToDestinationIncludingDeparture(planeData, round);
 		
-		for (int i = 0; i < planes.size(); i++) {
-			if (i != indexOfStepsToDestination) {
-				bearings[i] = calculateBearingWithCap(planes.get(i));
-			}
+		int lastIndex = sortedPlaneData.size()-1;
+		for(int i = 0; i < lastIndex; i ++) {
+			int planeIndex = sortedPlaneData.get(i).getIndex();
+			updateBearingOfPlaneClosestToDestinationWithIndex(planeIndex, planes, round, bearings);
 		}
+		
+		PlaneInfo lastPlane = sortedPlaneData.get(lastIndex);
+		bearings[lastPlane.getIndex()] = calculateBearingWithCap(lastPlane);
 	}
 	
 	@Override
@@ -97,8 +119,11 @@ public class Group2Player extends airplane.sim.Player {
 	
 	protected Boolean shouldVeerPlanes(ArrayList<Plane> planes, int round) {
 		SimulationResult result = startSimulation(planes, round);
+		crashes = getSimulationCrashes(result, 12);
 		
 		logger.info(String.format("Simulation %s", result.isSuccess() ?  "succeeded" : "failed"));
+		logger.info(String.format("Crashes: %s", crashes));
+		
 		if(result.isSuccess()) return false;
 		if(simulationCrashTooFarIntoFuture(result, round)) return false;
 
@@ -112,9 +137,9 @@ public class Group2Player extends airplane.sim.Player {
 	 * @param round
 	 * @return
 	 */
-	protected Boolean simulationCrashTooFarIntoFuture(SimulationResult result, int round) {
+	protected Boolean simulationCrashTooFarIntoFuture(SimulationResult result, int currentRound) {
 		return result.getReason() == SimulationResult.TOO_CLOSE && 
-				result.getRound() - round > 20;
+				result.getRound() > currentRound + 40;
 	}
 	
 	protected double getBearingCap() {
@@ -136,7 +161,7 @@ public class Group2Player extends airplane.sim.Player {
 		if (Math.abs(bearing - oldBearing) <= cap) return bearing;
 		
 		int sign = oldBearing > bearing ? -1 : 1;
-		return normalizedBearing(oldBearing + sign * cap);	
+		return PlaneUtil.normalizedBearing(oldBearing + sign * cap);	
 	}
 	
 	protected Boolean isAwaitingTakeoff(double bearing) {
@@ -175,7 +200,17 @@ public class Group2Player extends airplane.sim.Player {
 		return bearings;
 	}
 	
-	double getVeerBearing(Plane plane, Plane toAvoid) {
-		return 9.9;
+	
+	double getVeerBearing(Plane prioritizedPlane, Plane deprioritizedPlane) {
+		return PlaneUtil.bearingAway(prioritizedPlane, deprioritizedPlane, 9.9);
+	}
+	
+	/**
+	 * Runs the simulation and returns any crashes that occurred.
+	 * @return
+	 */
+	ArrayList<PlanePair> getSimulationCrashes(SimulationResult result, double distanceThreshold) {
+		ArrayList<Plane> finalPlanes = result.getPlanes();
+		return PlaneUtil.detectCollisions(finalPlanes, distanceThreshold);
 	}
 }

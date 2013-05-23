@@ -34,4 +34,11 @@ public class UtilityTest {
 		assertArrayEquals(expectedDistances, distances);
 	}
 
+	@Test
+	public void testBearingAway() {
+		assertEquals(160, PlaneUtil.bearingAway(180, 170, 10), 0.01);
+		double ambiguousBearing = PlaneUtil.bearingAway(180, 180, 10);
+		assertTrue(ambiguousBearing == 190 || ambiguousBearing == 170);
+		assertEquals(350, PlaneUtil.bearingAway(90, 0, 10), 0.01);
+	}
 }
