@@ -4,8 +4,8 @@ import java.awt.geom.Point2D;
 
 
 public class PlaneCollision {
-	PlanePath plane1;
-	PlanePath plane2;
+	private PlanePath path1;
+	private PlanePath path2;
 	private int plane1segment;
 	private int plane2segment;
 	
@@ -33,6 +33,22 @@ public class PlaneCollision {
 	
 	public void setPlane1segment(int plane1segment) {
 		this.plane1segment = plane1segment;
+	}
+
+	public PlanePath getPath1() {
+		return path1;
+	}
+
+	public void setPath1(PlanePath path1) {
+		this.path1 = path1;
+	}
+
+	public PlanePath getPath2() {
+		return path2;
+	}
+
+	public void setPath2(PlanePath path) {
+		this.path2 = path;
 	}
 	
 	

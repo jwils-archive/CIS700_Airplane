@@ -56,6 +56,11 @@ public class PlanePath {
 		return startTimestep;
 	}
 	
+	public PlaneCollision getPlaneCollision(PlanePath otherPath) {
+		//TODO
+		return null;
+	}
+	
 	public Point2D.Double getCollisionPoint(PlanePath otherPath) {
 		for (int i = Math.max(startTimestep, otherPath.getStartTimestep()); i <= Math.min(getArrivalStep(), otherPath.getArrivalStep()); i++) {
 			Point2D.Double thisPos = getPosition(i);
