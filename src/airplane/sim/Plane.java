@@ -17,6 +17,8 @@ public class Plane extends GameObject {
 	private double destinationX;
 	private double destinationY;
 	
+	public int id;
+	
 	private ArrayList<Point2D.Double> allPoints = new ArrayList<Point2D.Double>();
 
 	public void addToHistory(Point2D.Double point) {
