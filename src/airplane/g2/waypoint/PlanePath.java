@@ -12,7 +12,7 @@ public class PlanePath {
 	double INTERSECTION_DISTANCE = 5;
 	
 	ArrayList<Point2D.Double> waypoints;
-	Plane plane;
+	private Plane plane;
 	int startTimestep;
 	
 	public PlanePath(Plane p) {
@@ -22,7 +22,13 @@ public class PlanePath {
 		waypoints.add(p.getLocation());
 		waypoints.add(p.getDestination());
 		
-		plane = p;		
+		setPlane(p);		
+	}
+	
+	public PlanePath(PlanePath oldPath) {
+		plane = oldPath.getPlane();
+		startTimestep = oldPath.getStartTimestep();
+		waypoints = new ArrayList<Point2D.Double>(oldPath.waypoints);
 	}
 	
 	public void delay(int amount) {
@@ -97,7 +103,7 @@ public class PlanePath {
 				Point2D.Double endPoint = waypoints.get(currentIndex);
 				Point2D.Double startPoint = waypoints.get(currentIndex);
 				
-				while(bearingInTemp > plane.MAX_BEARING_CHANGE) {
+				while(bearingInTemp > getPlane().MAX_BEARING_CHANGE) {
 					double dx = endPoint.x - startPoint.x;
 					double dy = endPoint.y -startPoint.y;
 					
@@ -120,7 +126,7 @@ public class PlanePath {
 	
 	public double getBearing(int timestep) {
 		if (timestep < startTimestep) return -1;
-		if (timestep > getArrivalStep()) return calculateBearing(plane.getLocation(), waypoints.get(waypoints.size() - 1));
+		if (timestep > getArrivalStep()) return calculateBearing(getPlane().getLocation(), waypoints.get(waypoints.size() - 1));
 		int savedTime = startTimestep;
 		int segment = 0;
 		
@@ -131,7 +137,7 @@ public class PlanePath {
 			distance = waypoints.get(segment).distance(waypoints.get(segment + 1));
 		}
 		
-		return calculateBearing(plane.getLocation(), waypoints.get(segment + 1));
+		return calculateBearing(getPlane().getLocation(), waypoints.get(segment + 1));
 		
 	}
 	
@@ -174,4 +180,12 @@ public class PlanePath {
 
 		return bearing;
     }
+
+	public Plane getPlane() {
+		return plane;
+	}
+
+	public void setPlane(Plane plane) {
+		this.plane = plane;
+	}
 }
