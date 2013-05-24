@@ -25,7 +25,7 @@ public class SimplePathCalculator extends PathCalculator{
 		ArrayList<PlanePath> paths = new ArrayList<PlanePath>(waypointHash.values());
 		
 		Boolean thereWasACrash = true;
-		for(int x = 0, limit = 10; thereWasACrash && x < limit; x ++) {
+		for(int x = 0, limit = 100; thereWasACrash && x < limit; x ++) {
 			for(int i = 0, count = paths.size(); i < count; i++) {
 				for(int j = i + 1; j < count; j++) {
 					thereWasACrash = putNewPathsIfPlanesAtIndicesCollide(waypointHash, new ArrayList<PlanePath>(waypointHash.values()), i, j);
@@ -86,13 +86,14 @@ public class SimplePathCalculator extends PathCalculator{
 			PlanePath[] pathsForAvoidMethod = avoid.avoid(
 					collision.getPath1(), collision.getPath2(), collision);
 			
+			//COME BACK TO THIS.
 			//if(planesCollideBeforePreviousCollision(collision, pathsForAvoidMethod)) continue;
 			
 			int stepForAvoidMethod = slowestArrivalStep(pathsForAvoidMethod);
 
 			PlaneCollision newCollision = collidePlanePaths(pathsForAvoidMethod[0], pathsForAvoidMethod[1]);
-			logger.error(newCollision);
 			
+			//TODO come back to this and prioritize based on if there is a collision later.
 			if(newCollision == null && stepForAvoidMethod < slowest) {
 				logger.warn("Got in null");
 				slowest = stepForAvoidMethod;
