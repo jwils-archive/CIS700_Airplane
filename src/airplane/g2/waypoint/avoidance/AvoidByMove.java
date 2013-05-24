@@ -24,9 +24,9 @@ public class AvoidByMove extends AvoidMethod {
 		Point2D.Double wayPoint = PointUtil.addPoints(collisionObject.getCollisionPoint(), moveAmount);
 		
 		if (planeToMove == PlaneIndex.PLANE_ONE) {
-			outPath1.addWaypoint(collisionObject.getPlane1segment(), wayPoint); 
+			outPath1.addWaypoint(collisionObject.getPlane1segment() + 1, wayPoint); 
 		} else {
-			outPath2.addWaypoint(collisionObject.getPlane2segment(), wayPoint);
+			outPath2.addWaypoint(collisionObject.getPlane2segment() + 1, wayPoint);
 		}
 		return new PlanePath[]{outPath1, outPath2};
 	}

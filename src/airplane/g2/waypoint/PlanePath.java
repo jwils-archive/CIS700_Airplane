@@ -8,8 +8,8 @@ import org.apache.log4j.Logger;
 import airplane.sim.Plane;
 
 public class PlanePath {
-	private Logger logger = Logger.getLogger(this.getClass());
-	double INTERSECTION_DISTANCE = 5;
+	
+	double INTERSECTION_DISTANCE = 10;
 	
 	ArrayList<Point2D.Double> waypoints;
 	private Plane plane;
@@ -66,11 +66,7 @@ public class PlanePath {
 			Point2D.Double thisPos = thisPathPos.getPosition();
 			Point2D.Double otherPos = otherPathPos.getPosition();
 			
-			logger.info(thisPos);
-			logger.info(i);
 			if (thisPos.distance(otherPos) < INTERSECTION_DISTANCE) {
-				logger.info(thisPos);
-				logger.info(i);
 				collision.setRound(i);
 				collision.setCollisionPoint(thisPos);
 				collision.setPlane1segment(thisPathPos.getSegment());

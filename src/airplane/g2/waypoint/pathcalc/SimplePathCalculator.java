@@ -10,11 +10,14 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 
+import org.apache.log4j.Logger;
+
 import airplane.g2.waypoint.PlaneCollision;
 import airplane.g2.waypoint.PlanePath;
 import airplane.sim.Plane;
 
 public class SimplePathCalculator extends PathCalculator{
+	private Logger logger = Logger.getLogger(this.getClass());
 
 	//TODO Better method of adding waypoint.
 	@Override
@@ -25,7 +28,7 @@ public class SimplePathCalculator extends PathCalculator{
 		for(int x = 0, limit = 10; thereWasACrash && x < limit; x ++) {
 			for(int i = 0, count = paths.size(); i < count; i++) {
 				for(int j = i + 1; j < count; j++) {
-					thereWasACrash = putNewPathsIfPlanesAtIndicesCollide(waypointHash, paths, i, j);
+					thereWasACrash = putNewPathsIfPlanesAtIndicesCollide(waypointHash, new ArrayList<PlanePath>(waypointHash.values()), i, j);
 				}
 			}
 		}
@@ -78,16 +81,20 @@ public class SimplePathCalculator extends PathCalculator{
 		AvoidMethod[] methods = getAvoidMethods();
 		int slowest = Integer.MAX_VALUE;
 		PlanePath[] bestPaths = new PlanePath[]{collision.getPath1(), collision.getPath2()};
-		
+		logger.warn("HEY!" + methods.length);
 		for(AvoidMethod avoid: methods) {
 			PlanePath[] pathsForAvoidMethod = avoid.avoid(
 					collision.getPath1(), collision.getPath2(), collision);
 			
-			if(planesCollideBeforePreviousCollision(collision, pathsForAvoidMethod)) continue;
+			//if(planesCollideBeforePreviousCollision(collision, pathsForAvoidMethod)) continue;
 			
 			int stepForAvoidMethod = slowestArrivalStep(pathsForAvoidMethod);
-			//TODO make sure they don't collide anymore
-			if(stepForAvoidMethod < slowest) {
+
+			PlaneCollision newCollision = collidePlanePaths(pathsForAvoidMethod[0], pathsForAvoidMethod[1]);
+			logger.error(newCollision);
+			
+			if(newCollision == null && stepForAvoidMethod < slowest) {
+				logger.warn("Got in null");
 				slowest = stepForAvoidMethod;
 				bestPaths = pathsForAvoidMethod;
 			}
@@ -116,12 +123,14 @@ public class SimplePathCalculator extends PathCalculator{
 	
 	public AvoidMethod[] getAvoidMethods() {
 		return new AvoidMethod[] {
+				new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(0, -8)),
+				new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(0, 20)),
 				new AvoidByDelay(PlaneIndex.PLANE_ONE, 10),
 				new AvoidByDelay(PlaneIndex.PLANE_ONE, 20),
-				new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(5, -5)),
-				new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(5, 5)),
-				new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(-5, -5)),
-				new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(-5, -5))
+				new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(10, -10)),
+				new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(10, 10)),
+				new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(-10, -10)),
+				new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(-10, -10))
 		};
 	}
 	

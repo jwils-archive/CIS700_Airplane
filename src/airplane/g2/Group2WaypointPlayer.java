@@ -32,9 +32,6 @@ public class Group2WaypointPlayer extends airplane.sim.Player {
 			id++;
 		}
 		pathCalculator.calculatePaths(waypointHash);
-		for (Plane plane : planes) {
-			logger.warn(waypointHash.get(plane));
-		}
 	}
 
 	@Override
@@ -46,9 +43,7 @@ public class Group2WaypointPlayer extends airplane.sim.Player {
 			double newBearing = path.getBearing(round);
 			
 			if (bearings[i] >= 0 && Math.abs(newBearing - bearings[i]) > 9.5) {
-				logger.info("Greater than 10 change");
 				if ( (newBearing > bearings[i] && newBearing - bearings[i] < 180) || (newBearing < bearings[i] && newBearing - bearings[i] > 180)) {
-					logger.info("Greater than 10 change pos");
 					bearings[i] = (bearings[i] + 9.5) % 360;
 				} else {
 					bearings[i] = (bearings[i] - 9.5 + 360) % 360;

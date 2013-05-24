@@ -12,6 +12,13 @@ public class PlaneCollision {
 	
 	private Point2D.Double collisionPoint;
 	
+	public String toString() {
+		String output = "";
+		output += "Path1: " + path1;
+		output += "Path2: " + path2;
+		output += "round: " + round;
+		return output;
+	}
 	public Point2D.Double getCollisionPoint() {
 		return collisionPoint;
 	}
