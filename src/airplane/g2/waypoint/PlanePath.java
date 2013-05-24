@@ -57,23 +57,33 @@ public class PlanePath {
 	}
 	
 	public PlaneCollision getPlaneCollision(PlanePath otherPath) {
-		//TODO
+		PlaneCollision collision = new PlaneCollision();
+		collision.setPath1(this);
+		collision.setPath2(otherPath);
+		for (int i = Math.max(startTimestep, otherPath.getStartTimestep()); i <= Math.min(getArrivalStep(), otherPath.getArrivalStep()); i++) {
+			PlanePathPosition thisPathPos = getPathPosition(i);
+			PlanePathPosition otherPathPos = otherPath.getPathPosition(i);
+			Point2D.Double thisPos = thisPathPos.getPosition();
+			Point2D.Double otherPos = otherPathPos.getPosition();
+			
+			logger.info(thisPos);
+			logger.info(i);
+			if (thisPos.distance(otherPos) < INTERSECTION_DISTANCE) {
+				logger.info(thisPos);
+				logger.info(i);
+				collision.setRound(i);
+				collision.setCollisionPoint(thisPos);
+				collision.setPlane1segment(thisPathPos.getSegment());
+				collision.setPlane2segment(otherPathPos.getSegment());
+				
+				return collision;
+			}
+		}
 		return null;
 	}
 	
 	public Point2D.Double getCollisionPoint(PlanePath otherPath) {
-		for (int i = Math.max(startTimestep, otherPath.getStartTimestep()); i <= Math.min(getArrivalStep(), otherPath.getArrivalStep()); i++) {
-			Point2D.Double thisPos = getPosition(i);
-			Point2D.Double otherPos = otherPath.getPosition(i);
-			logger.warn(thisPos);
-			logger.warn(i);
-			if (thisPos.distance(otherPos) < INTERSECTION_DISTANCE) {
-				logger.warn(thisPos);
-				logger.warn(i);
-				return thisPos;
-			}
-		}
-		return null;
+		return getPlaneCollision(otherPath).getCollisionPoint();
 	}
 	
 	public int getArrivalStep() {
@@ -108,7 +118,7 @@ public class PlanePath {
 				Point2D.Double endPoint = waypoints.get(currentIndex);
 				Point2D.Double startPoint = waypoints.get(currentIndex);
 				
-				while(bearingInTemp > getPlane().MAX_BEARING_CHANGE) {
+				while(bearingInTemp > Plane.MAX_BEARING_CHANGE) {
 					double dx = endPoint.x - startPoint.x;
 					double dy = endPoint.y -startPoint.y;
 					
@@ -146,8 +156,7 @@ public class PlanePath {
 		
 	}
 	
-	
-	public Point2D.Double getPosition(int timestep) {
+	public PlanePathPosition getPathPosition(int timestep) {
 		if (timestep < startTimestep) return null;
 		if (timestep > getArrivalStep() + 1) return null;
 		int savedTime = startTimestep;
@@ -168,7 +177,15 @@ public class PlanePath {
 		dx = dx/norm;
 		dy = dy/norm;
 		
-		return new Point2D.Double(waypoints.get(segment).x + dx * (timestep - savedTime), waypoints.get(segment).y + dy * (timestep - savedTime));
+		PlanePathPosition pos = new PlanePathPosition();
+		pos.setPosition(new Point2D.Double(waypoints.get(segment).x + dx * (timestep - savedTime), waypoints.get(segment).y + dy * (timestep - savedTime)));
+		pos.setSegment(segment);
+		return pos;
+	}
+	
+	public Point2D.Double getPosition(int timestep) {
+		PlanePathPosition pos = getPathPosition(timestep);
+		return pos == null ? null : pos.getPosition();
 	}
 
 	/*

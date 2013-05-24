@@ -21,26 +21,30 @@ public class SimplePathCalculator extends PathCalculator{
 	public void calculatePaths(HashMap<Plane, PlanePath> waypointHash) {
 		ArrayList<PlanePath> paths = new ArrayList<PlanePath>(waypointHash.values());
 		
-		for(int i = 0, count = paths.size(); i < count; i++) {
-			for(int j = i + 1; j < count; j++) {
-				putNewPathsIfPlanesAtIndicesCollide(waypointHash, paths, i, j);
+		Boolean thereWasACrash = true;
+		for(int x = 0, limit = 10; thereWasACrash && x < limit; x ++) {
+			for(int i = 0, count = paths.size(); i < count; i++) {
+				for(int j = i + 1; j < count; j++) {
+					thereWasACrash = putNewPathsIfPlanesAtIndicesCollide(waypointHash, paths, i, j);
+				}
 			}
 		}
 	}
 	
-	protected void putNewPathsIfPlanesAtIndicesCollide(
+	protected Boolean putNewPathsIfPlanesAtIndicesCollide(
 			HashMap<Plane, PlanePath> waypointHash,
 			ArrayList<PlanePath> paths,
 			int i, int j) {
 		PlanePath path1 = paths.get(i);
 		PlanePath path2 = paths.get(j);
 		
-		if(pathPlanesAreEqual(path1, path2)) return;
+		if(pathPlanesAreEqual(path1, path2)) return false;
 		
 		PlaneCollision collision = collidePlanePaths(path1, path2);
-		if(collision == null) return;
+		if(collision == null) return false;
 		
 		putPaths(waypointHash, planePathsDidCollide(collision));
+		return true;
 	}
 	
 	protected void putPaths(HashMap<Plane, PlanePath> waypointHash, PlanePath[] paths) {
@@ -73,11 +77,14 @@ public class SimplePathCalculator extends PathCalculator{
 	public PlanePath[] planePathsDidCollide(PlaneCollision collision) {
 		AvoidMethod[] methods = getAvoidMethods();
 		int slowest = Integer.MAX_VALUE;
-		PlanePath[] bestPaths = null;
+		PlanePath[] bestPaths = new PlanePath[]{collision.getPath1(), collision.getPath2()};
 		
 		for(AvoidMethod avoid: methods) {
 			PlanePath[] pathsForAvoidMethod = avoid.avoid(
 					collision.getPath1(), collision.getPath2(), collision);
+			
+			if(planesCollideBeforePreviousCollision(collision, pathsForAvoidMethod)) continue;
+			
 			int stepForAvoidMethod = slowestArrivalStep(pathsForAvoidMethod);
 			//TODO make sure they don't collide anymore
 			if(stepForAvoidMethod < slowest) {
@@ -88,8 +95,19 @@ public class SimplePathCalculator extends PathCalculator{
 		return bestPaths;
 	}
 	
+	public Boolean planesCollideBeforePreviousCollision(PlaneCollision collision, PlanePath[] paths) {
+		PlaneCollision newCollision = collidePlanePaths(paths);
+		if(newCollision == null) return false;
+		
+		return collision.getRound() >= newCollision.getRound();
+	}
+	
 	public PlaneCollision collidePlanePaths(PlanePath a, PlanePath b) {
 		return a.getPlaneCollision(b);
+	}
+	
+	public PlaneCollision collidePlanePaths(PlanePath[] paths) {
+		return collidePlanePaths(paths[0], paths[1]);
 	}
 	
 	public Boolean doesCollide(PlanePath a, PlanePath b) {
@@ -98,8 +116,11 @@ public class SimplePathCalculator extends PathCalculator{
 	
 	public AvoidMethod[] getAvoidMethods() {
 		return new AvoidMethod[] {
-				new AvoidByDelay(PlaneIndex.PLANE_ONE, 5),
+				new AvoidByDelay(PlaneIndex.PLANE_ONE, 10),
+				new AvoidByDelay(PlaneIndex.PLANE_ONE, 20),
+				new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(5, -5)),
 				new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(5, 5)),
+				new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(-5, -5)),
 				new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(-5, -5))
 		};
 	}

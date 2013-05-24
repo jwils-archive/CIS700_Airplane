@@ -8,6 +8,7 @@ public class PlaneCollision {
 	private PlanePath path2;
 	private int plane1segment;
 	private int plane2segment;
+	private int round;
 	
 	private Point2D.Double collisionPoint;
 	
@@ -49,6 +50,14 @@ public class PlaneCollision {
 
 	public void setPath2(PlanePath path) {
 		this.path2 = path;
+	}
+
+	public int getRound() {
+		return round;
+	}
+
+	public void setRound(int round) {
+		this.round = round;
 	}
 	
 	
