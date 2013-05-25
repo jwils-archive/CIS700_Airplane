@@ -27,7 +27,7 @@ public class SimplePathCalculator extends PathCalculator{
 		ArrayList<PlanePath> paths = new ArrayList<PlanePath>(waypointHash.values());
 		
 		Boolean thereWasACrash = true;
-		int x = 0, limit = 1000;
+		int x = 0, limit = 500;
 		for(; thereWasACrash && x < limit; x++) {
 			thereWasACrash = false;
 			for(int i = 0, count = paths.size(); i < count; i++) {
@@ -129,7 +129,7 @@ public class SimplePathCalculator extends PathCalculator{
 		int adjustedSteps = 1000-slowestArrivalStep(r.getPaths());
 		int nextCrashRound = 0;
 		// bonus points if we don't crash
-		int noCrashFactor = 100;
+		int noCrashFactor = 2000;
 		if(r.getNextCollision() != null) { 
 			noCrashFactor = 0;
 			nextCrashRound = r.getNextCollision().getRound();
@@ -179,20 +179,20 @@ public class SimplePathCalculator extends PathCalculator{
 			new AvoidByDelay(PlaneIndex.PLANE_ONE, 5),
 			new AvoidByDelay(PlaneIndex.PLANE_ONE, 10),
 			new AvoidByDelay(PlaneIndex.PLANE_ONE, 20),
-			new AvoidByDelay(PlaneIndex.PLANE_ONE, 100),
-			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(6, -6)),
-			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(6, 6)),
-			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(-6, -6)),
-			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(-6, 6)),
+			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(10, -10)),
+			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(10, 10)),
+			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(-10, -10)),
+			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(-10, 10)),
+
 	        
 			new AvoidByDelay(PlaneIndex.PLANE_TWO, 5),
 			new AvoidByDelay(PlaneIndex.PLANE_TWO, 10),
 			new AvoidByDelay(PlaneIndex.PLANE_TWO, 20),
-			new AvoidByDelay(PlaneIndex.PLANE_TWO, 100),
-			new AvoidByMove(PlaneIndex.PLANE_TWO, new Point2D.Double(6, -6)),
-			new AvoidByMove(PlaneIndex.PLANE_TWO, new Point2D.Double(6, 6)),
-			new AvoidByMove(PlaneIndex.PLANE_TWO, new Point2D.Double(-6, -6)),
-			new AvoidByMove(PlaneIndex.PLANE_TWO, new Point2D.Double(-6, 6))
+			new AvoidByMove(PlaneIndex.PLANE_TWO, new Point2D.Double(10, -10)),
+			new AvoidByMove(PlaneIndex.PLANE_TWO, new Point2D.Double(10, 10)),
+			new AvoidByMove(PlaneIndex.PLANE_TWO, new Point2D.Double(-10, -10)),
+			new AvoidByMove(PlaneIndex.PLANE_TWO, new Point2D.Double(-10, 10))
+
 
 		};
 	}

@@ -11,11 +11,12 @@ public class AvoidByMove extends AvoidMethod {
 	Point2D.Double moveAmount;
 	Boolean shouldAdjustForBounds = true;
 	
-	//TODO change these
-	double minX = 6;
-	double minY = 6;
-	double maxX = 94;
-	double maxY = 94;
+	// These are like this because if the waypoint is too close to the boundary, the
+	// plane won't have enough time to turn around and it will go out of bounds.
+	double minX = 11;
+	double minY = 11;
+	double maxX = 89;
+	double maxY = 89;
 	
 	public AvoidByMove(PlaneIndex planeToMove, Point2D.Double moveAmount) {
 		this.planeToMove = planeToMove;
