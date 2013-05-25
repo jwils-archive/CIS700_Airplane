@@ -98,7 +98,7 @@ public class SimplePathCalculator extends PathCalculator{
 	}
 	
 	public PlanePath[] planePathsDidCollide(PlaneCollision collision) {
-		AvoidMethod[] methods = getAvoidMethods();
+		ArrayList<AvoidMethod> methods = getAvoidMethods();
 		
 		ArrayList<AvoidResult> results = new ArrayList<AvoidResult>();
 		
@@ -186,30 +186,42 @@ public class SimplePathCalculator extends PathCalculator{
 		return collidePlanePaths(a, b) != null;
 	}
 	
-	public AvoidMethod[] getAvoidMethods() {
-		return new AvoidMethod[] {
-//				
-//			new AvoidByDelay(PlaneIndex.PLANE_ONE, 5),
-//			new AvoidByDelay(PlaneIndex.PLANE_ONE, 10),
-//			new AvoidByDelay(PlaneIndex.PLANE_ONE, 20),
-//			new AvoidByDelay(PlaneIndex.PLANE_ONE, 50),
-//			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(10, -10)),
-//			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(10, 10)),
-//			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(-10, -10)),
-//			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(-10, 10)),
-//			
-
-	        
-			new AvoidByDelay(PlaneIndex.PLANE_TWO, 5),
-			new AvoidByDelay(PlaneIndex.PLANE_TWO, 10),
-			new AvoidByDelay(PlaneIndex.PLANE_TWO, 20),
-			new AvoidByMove(PlaneIndex.PLANE_TWO, new Point2D.Double(10, -10)),
-			new AvoidByMove(PlaneIndex.PLANE_TWO, new Point2D.Double(10, 10)),
-			new AvoidByMove(PlaneIndex.PLANE_TWO, new Point2D.Double(-10, -10)),
-			new AvoidByMove(PlaneIndex.PLANE_TWO, new Point2D.Double(-10, 10))
-
-
-		};
+	public ArrayList<Point2D.Double> getCompassPointsOfMagnitude(double mag) {
+		ArrayList<Point2D.Double> list = new ArrayList<Point2D.Double>();
+		Collections.addAll(list, new Point2D.Double[]{
+				new Point2D.Double(mag, mag),
+				new Point2D.Double(0, mag),
+				new Point2D.Double(mag, 0),
+				new Point2D.Double(mag, -mag),
+				new Point2D.Double(-mag, mag),
+				new Point2D.Double(-mag, -mag),
+				new Point2D.Double(0, -mag),
+				new Point2D.Double(-mag, 0)
+		});
+		return list;
+	}
+	
+	public ArrayList<AvoidMethod> getCompassMoveMethodsOfMagnitude(PlaneIndex index, double mag) {
+		ArrayList<Point2D.Double> pts = getCompassPointsOfMagnitude(mag);
+		ArrayList<AvoidMethod> methods = new ArrayList<AvoidMethod>();
+		for(Point2D.Double pt: pts) {
+			methods.add(new AvoidByMove(index, pt));
+		}
+		return methods;
+	}
+	
+	public ArrayList<AvoidMethod> getAvoidMethods() {
+		ArrayList<AvoidMethod> methods = new ArrayList<AvoidMethod>();
+		
+		methods.addAll(getCompassMoveMethodsOfMagnitude(PlaneIndex.PLANE_TWO, 5.1));
+		methods.addAll(getCompassMoveMethodsOfMagnitude(PlaneIndex.PLANE_TWO, 9));
+		methods.addAll(getCompassMoveMethodsOfMagnitude(PlaneIndex.PLANE_TWO, 10));
+		
+		for(int delay: new int[]{5, 10, 20}) {
+			methods.add(new AvoidByDelay(PlaneIndex.PLANE_TWO, delay));
+		}
+		
+		return methods;
 	}
 	
 
