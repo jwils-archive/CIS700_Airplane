@@ -24,41 +24,50 @@ public class SimplePathCalculator extends PathCalculator{
 	//TODO Better method of adding waypoint.
 	@Override
 	public void calculatePaths(HashMap<Plane, PlanePath> waypointHash) {
-		ArrayList<PlanePath> paths = new ArrayList<PlanePath>(waypointHash.values());
-		
-		Boolean thereWasACrash = true;
-		int x = 0, limit = 500;
-		for(; thereWasACrash && x < limit; x++) {
-			thereWasACrash = false;
-			for(int i = 0, count = paths.size(); i < count; i++) {
-				for(int j = i + 1; j < count; j++) {
-					thereWasACrash = thereWasACrash || putNewPathsIfPlanesAtIndicesCollide(
-							waypointHash, 
-							new ArrayList<PlanePath>(waypointHash.values()), 
-							i, 
-							j);
-				}
-			}
+		int x = 0, limit = 1000;
+		for(; x < limit; x++) {
+			PlaneCollision collision = soonestCollision(collisionsInHash(waypointHash));
+			if(collision == null) break;
+			putPaths(waypointHash, planePathsDidCollide(collision));
 		}
 		if(x == limit) {
 			logger.warn("There will be a crash!");
 		}
 	}
 	
-	protected Boolean putNewPathsIfPlanesAtIndicesCollide(
-			HashMap<Plane, PlanePath> waypointHash,
-			ArrayList<PlanePath> paths,
-			int i, int j) {
-		PlanePath path1 = paths.get(i);
-		PlanePath path2 = paths.get(j);
+	public ArrayList<PlaneCollision> collisionsInHash(HashMap<Plane, PlanePath> waypointHash) {
+		ArrayList<PlanePath> paths = new ArrayList<PlanePath>(waypointHash.values());
+		ArrayList<PlaneCollision> collisions = new ArrayList<PlaneCollision>();
+		for(int i = 0, count = paths.size(); i < count; i++) {
+			for(int j = i + 1; j < count; j++) {
+				PlanePath path1 = paths.get(i);
+				PlanePath path2 = paths.get(j);
+				
+				PlaneCollision collision = collidePlanePaths(path1, path2);
+				if(collision == null) continue;
+				
+				collisions.add(collision);
+			}
+		}
+		return collisions;
+	}
+	
+	public ArrayList<PlaneCollision> collisionsSortedByRound(ArrayList<PlaneCollision> collisions) {
+		ArrayList<PlaneCollision> sortedCollisions = new ArrayList<PlaneCollision>(collisions);
+		Collections.sort(sortedCollisions, new Comparator<PlaneCollision>(){
+			@Override
+			public int compare(PlaneCollision o1, PlaneCollision o2) {
+				return ((Integer) o1.getRound()).compareTo(o2.getRound());
+			}
+		});
+		return sortedCollisions;
+	}
+	
+	public PlaneCollision soonestCollision(ArrayList<PlaneCollision> collisions) {
+		if(collisions.isEmpty()) return null;
 		
-		if(i == j) return false;
-		
-		PlaneCollision collision = collidePlanePaths(path1, path2);
-		if(collision == null) return false;
-		
-		putPaths(waypointHash, planePathsDidCollide(collision));
-		return true;
+		ArrayList<PlaneCollision> sorted = collisionsSortedByRound(collisions);
+		return sorted.get(0);
 	}
 	
 	protected void putPaths(HashMap<Plane, PlanePath> waypointHash, PlanePath[] paths) {
