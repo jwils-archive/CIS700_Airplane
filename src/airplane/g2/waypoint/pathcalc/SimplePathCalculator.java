@@ -105,7 +105,11 @@ public class SimplePathCalculator extends PathCalculator{
 			results.add(result);
 		}
 		
-		results = avoidResultsByHeuristic(results);
+		results = avoidResultsByHeuristic(avoidResultsWithoutCrashingSooner(results));
+		
+		if(results.isEmpty()) {
+			return new PlanePath[]{collision.getPath1(), collision.getPath2()};
+		}
 		
 		return results.get(results.size()-1).getPaths();	
 	}
@@ -129,12 +133,12 @@ public class SimplePathCalculator extends PathCalculator{
 		int adjustedSteps = 1000-slowestArrivalStep(r.getPaths());
 		int nextCrashRound = 0;
 		// bonus points if we don't crash
-		int noCrashFactor = 2000;
+		int noCrashFactor = 200;
 		if(r.getNextCollision() != null) { 
 			noCrashFactor = 0;
 			nextCrashRound = r.getNextCollision().getRound();
 		}
-		int crashFactor = nextCrashRound - r.getPreviousCollision().getRound();
+		int crashFactor = 5 * (nextCrashRound - r.getPreviousCollision().getRound());
 		
 		return adjustedSteps + crashFactor + noCrashFactor; 
 	}
@@ -175,14 +179,16 @@ public class SimplePathCalculator extends PathCalculator{
 	
 	public AvoidMethod[] getAvoidMethods() {
 		return new AvoidMethod[] {
-				
-			new AvoidByDelay(PlaneIndex.PLANE_ONE, 5),
-			new AvoidByDelay(PlaneIndex.PLANE_ONE, 10),
-			new AvoidByDelay(PlaneIndex.PLANE_ONE, 20),
-			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(10, -10)),
-			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(10, 10)),
-			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(-10, -10)),
-			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(-10, 10)),
+//				
+//			new AvoidByDelay(PlaneIndex.PLANE_ONE, 5),
+//			new AvoidByDelay(PlaneIndex.PLANE_ONE, 10),
+//			new AvoidByDelay(PlaneIndex.PLANE_ONE, 20),
+//			new AvoidByDelay(PlaneIndex.PLANE_ONE, 50),
+//			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(10, -10)),
+//			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(10, 10)),
+//			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(-10, -10)),
+//			new AvoidByMove(PlaneIndex.PLANE_ONE, new Point2D.Double(-10, 10)),
+//			
 
 	        
 			new AvoidByDelay(PlaneIndex.PLANE_TWO, 5),

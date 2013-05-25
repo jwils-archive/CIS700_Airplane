@@ -57,7 +57,8 @@ public class AvoidResult {
 	}
 	
 	public Boolean isBetterThanPreviousCollision() {
-		return getPreviousCollision().getRound() < getNextCollision().getRound();
+		return getNextCollision() == null ||
+				getPreviousCollision().getRound() < getNextCollision().getRound();
 	}
 
 	public int getHeuristicValue() {
