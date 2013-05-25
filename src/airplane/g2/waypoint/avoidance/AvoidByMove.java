@@ -9,6 +9,13 @@ import airplane.g2.util.PointUtil;
 public class AvoidByMove extends AvoidMethod {
 	PlaneIndex planeToMove;
 	Point2D.Double moveAmount;
+	Boolean shouldAdjustForBounds = true;
+	
+	//TODO change these
+	double minX = 6;
+	double minY = 6;
+	double maxX = 94;
+	double maxY = 94;
 	
 	public AvoidByMove(PlaneIndex planeToMove, Point2D.Double moveAmount) {
 		this.planeToMove = planeToMove;
@@ -22,6 +29,7 @@ public class AvoidByMove extends AvoidMethod {
 		PlanePath outPath2 = new PlanePath(path2);
 		
 		Point2D.Double wayPoint = PointUtil.addPoints(collisionObject.getCollisionPoint(), moveAmount);
+		if(shouldAdjustForBounds) wayPoint = adjustPointForBounds(wayPoint);
 		
 		if (planeToMove == PlaneIndex.PLANE_ONE) {
 			outPath1.addWaypoint(collisionObject.getPlane1segment() + 1, wayPoint); 
@@ -31,5 +39,13 @@ public class AvoidByMove extends AvoidMethod {
 		return new PlanePath[]{outPath1, outPath2};
 	}
 	
-
+	protected double bound(double num, double min, double max) {
+		return Math.max(Math.min(num, max), min);
+	}
+	
+	protected Point2D.Double adjustPointForBounds(Point2D.Double wayPoint) {
+		return new Point2D.Double(
+				bound(wayPoint.x, minX, maxX), 
+				bound(wayPoint.y, minY, maxY));
+	}
 }
