@@ -9,7 +9,7 @@ import airplane.sim.Plane;
 
 public class PlanePath {
 	
-	double INTERSECTION_DISTANCE = 14;
+	double INTERSECTION_DISTANCE = 10.1;
 	
 	ArrayList<Point2D.Double> waypoints;
 	private Plane plane;
