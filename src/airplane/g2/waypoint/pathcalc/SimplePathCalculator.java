@@ -31,7 +31,7 @@ public class SimplePathCalculator extends PathCalculator{
 			// always simulate from the beginning
 			WaypointSimulationResult result = new WaypointSimulator(waypointHash).startWaypointSimulation(0);
 			if(result.isCollision()) {
-				putPaths(waypointHash, planePathsDidCollide(result.getCollision()));
+				putPaths(waypointHash, planePathsDidCollide(waypointHash, result.getCollision()));
 			} else {
 				break;
 			}
@@ -46,22 +46,6 @@ public class SimplePathCalculator extends PathCalculator{
 		return sim.startWaypointSimulation(0);
 	}
 	
-	public ArrayList<PlaneCollision> collisionsInHash(HashMap<Plane, PlanePath> waypointHash) {
-		ArrayList<PlanePath> paths = new ArrayList<PlanePath>(waypointHash.values());
-		ArrayList<PlaneCollision> collisions = new ArrayList<PlaneCollision>();
-		for(int i = 0, count = paths.size(); i < count; i++) {
-			for(int j = i + 1; j < count; j++) {
-				PlanePath path1 = paths.get(i);
-				PlanePath path2 = paths.get(j);
-				
-				PlaneCollision collision = collidePlanePaths(path1, path2);
-				if(collision == null) continue;
-				
-				collisions.add(collision);
-			}
-		}
-		return collisions;
-	}
 	
 	public ArrayList<PlaneCollision> collisionsSortedByRound(ArrayList<PlaneCollision> collisions) {
 		ArrayList<PlaneCollision> sortedCollisions = new ArrayList<PlaneCollision>(collisions);
@@ -108,7 +92,7 @@ public class SimplePathCalculator extends PathCalculator{
 		return slowest;
 	}
 	
-	public PlanePath[] planePathsDidCollide(PlaneCollision collision) {
+	public PlanePath[] planePathsDidCollide(HashMap<Plane, PlanePath> waypointHash, PlaneCollision collision) {
 		ArrayList<AvoidMethod> methods = getAvoidMethods();
 		
 		ArrayList<AvoidResult> results = new ArrayList<AvoidResult>();
@@ -118,9 +102,14 @@ public class SimplePathCalculator extends PathCalculator{
 					collision.getPath1(), collision.getPath2(), collision);
 			
 			int stepForAvoidMethod = slowestArrivalStep(pathsForAvoidMethod);
-			PlaneCollision newCollision = collidePlanePaths(pathsForAvoidMethod[0], pathsForAvoidMethod[1]);
+			WaypointSimulationResult simResult = collidePlanePaths(waypointHash,
+					pathsForAvoidMethod[0], pathsForAvoidMethod[1]);
+			
+			// don't consider results that aren't either a collision or success
+			if(!(simResult.isCollision() || simResult.isSuccess())) continue;
+			
 			AvoidResult result = new AvoidResult(avoid, pathsForAvoidMethod, 
-					stepForAvoidMethod, collision, newCollision);
+					stepForAvoidMethod, collision, simResult.getCollision());
 			
 			results.add(result);
 		}
@@ -178,25 +167,16 @@ public class SimplePathCalculator extends PathCalculator{
 		return sorted;
 	}
 	
-	public Boolean planesCollideBeforePreviousCollision(PlaneCollision collision, PlanePath[] paths) {
-		PlaneCollision newCollision = collidePlanePaths(paths);
-		if(newCollision == null) return false;
+	public WaypointSimulationResult collidePlanePaths(HashMap<Plane, PlanePath> waypointHash, 
+			PlanePath a, PlanePath b) {
+		ArrayList<PlanePath> paths = new ArrayList<PlanePath>();
+		paths.add(a);
+		paths.add(b);
+		HashMap<Plane, PlanePath> waypointHashCopy = PlaneUtil.waypointMapWithPaths(waypointHash, paths);
+		WaypointSimulationResult result = new WaypointSimulator(waypointHashCopy).startWaypointSimulation(0);
+		return result;
+	}
 		
-		return collision.getRound() >= newCollision.getRound();
-	}
-	
-	public PlaneCollision collidePlanePaths(PlanePath a, PlanePath b) {
-		return a.getPlaneCollision(b);
-	}
-	
-	public PlaneCollision collidePlanePaths(PlanePath[] paths) {
-		return collidePlanePaths(paths[0], paths[1]);
-	}
-	
-	public Boolean doesCollide(PlanePath a, PlanePath b) {
-		return collidePlanePaths(a, b) != null;
-	}
-	
 	public ArrayList<Point2D.Double> getCompassPointsOfMagnitude(double mag) {
 		ArrayList<Point2D.Double> list = new ArrayList<Point2D.Double>();
 		Collections.addAll(list, new Point2D.Double[]{
