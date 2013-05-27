@@ -1,5 +1,6 @@
 package airplane.g2.waypoint.pathcalc;
 
+import airplane.g2.PlanePair;
 import airplane.g2.util.PlaneUtil;
 import airplane.g2.waypoint.avoidance.*;
 import airplane.g2.waypoint.avoidance.AvoidMethod.PlaneIndex;
@@ -22,14 +23,21 @@ import airplane.sim.Plane;
 
 public class SimplePathCalculator extends PathCalculator{
 	private Logger logger = Logger.getLogger(this.getClass());
+	private ArrayList<AvoidMethod> avoidMethodsUsed = null;
 
 	//TODO Better method of adding waypoint.
 	@Override
 	public void calculatePaths(HashMap<Plane, PlanePath> waypointHash) {
-		int x = 0, limit = 1000;
+		modifyHashWithAvoidanceSchemes(waypointHash);
+		insertDelaysUntilNoCrash(waypointHash, 1000);
+	}
+	
+	protected void modifyHashWithAvoidanceSchemes(HashMap<Plane, PlanePath> waypointHash) {
+		avoidMethodsUsed = new ArrayList<AvoidMethod>();
+		int x = 0, limit = 100;
 		for(; x < limit; x++) {
 			// always simulate from the beginning
-			WaypointSimulationResult result = new WaypointSimulator(waypointHash).startWaypointSimulation(0);
+			WaypointSimulationResult result = simulationResultWithHash(waypointHash);
 			if(result.isCollision()) {
 				putPaths(waypointHash, planePathsDidCollide(waypointHash, result.getCollision()));
 			} else {
@@ -37,11 +45,46 @@ public class SimplePathCalculator extends PathCalculator{
 			}
 		}
 		if(x == limit) {
-			logger.warn("There will be a crash!");
+			logger.warn("There will be a crash, inserting delays");
 		}
 	}
 	
-	public WaypointSimulationResult simulate(HashMap<Plane, PlanePath> waypointHash) {
+	protected void insertDelaysUntilNoCrash(HashMap<Plane, PlanePath> waypointHash) {
+		insertDelaysUntilNoCrash(waypointHash, 100);
+	}
+	
+	protected void insertDelaysUntilNoCrash(HashMap<Plane, PlanePath> waypointHash, int tryLimit) {
+		int x = 0, limit = tryLimit;
+		ArrayList<PlanePath> paths = PlaneUtil.planePathsSortedByIndex(new ArrayList<PlanePath>(waypointHash.values()));
+		for(; x < limit; x++) {
+			WaypointSimulationResult result = simulationResultWithHash(waypointHash);
+			if(!result.isCollision()) break;
+			
+			insertDelayForSimulationResult(result, paths); 
+		}
+		if(x == limit) {
+			logger.warn("Could not delay planes successfully. There will be an unavoidable crash.");
+		}
+	}
+	
+	protected WaypointSimulationResult simulationResultWithHash(HashMap<Plane, PlanePath> waypointHash) {
+		return new WaypointSimulator(waypointHash).startWaypointSimulation(0);
+	}
+	
+	protected void insertDelayForSimulationResult(WaypointSimulationResult result, ArrayList<PlanePath> paths) {
+		PlanePair pair = result.getCollidingPairs().get(0);
+		
+		PlanePath path1 = paths.get(pair.getFirstIndex());
+		PlanePath path2 = paths.get(pair.getSecondIndex());
+		
+		// do this by plane id so we don't wind up in a cycle (this is a fail-safe)
+		PlanePath sooner = path1.getPlaneId() < path2.getPlaneId() ? path1: path2;
+		PlanePath later = path1 == sooner ? path2 : path1;
+		
+		sooner.delay(10);
+	}
+	
+	protected WaypointSimulationResult simulate(HashMap<Plane, PlanePath> waypointHash) {
 		WaypointSimulator sim = new WaypointSimulator(waypointHash);
 		return sim.startWaypointSimulation(0);
 	}
@@ -114,13 +157,18 @@ public class SimplePathCalculator extends PathCalculator{
 			results.add(result);
 		}
 		
-		results = avoidResultsByHeuristic(avoidResultsWithoutCrashingSooner(results));
+		results = avoidResultsByHeuristic(results);
+		results = avoidResultsWithoutCrashingSooner(results);
 		
 		if(results.isEmpty()) {
 			return new PlanePath[]{collision.getPath1(), collision.getPath2()};
 		}
 		
-		return results.get(results.size()-1).getPaths();	
+		AvoidResult selectedResult = results.get(results.size()-1);
+		
+		avoidMethodsUsed.add(selectedResult.getAvoidMethod());
+		
+		return selectedResult.getPaths();
 	}
 	
 	/**
@@ -142,14 +190,18 @@ public class SimplePathCalculator extends PathCalculator{
 		int adjustedSteps = 1000-slowestArrivalStep(r.getPaths());
 		int nextCrashRound = 0;
 		// bonus points if we don't crash
-		int noCrashFactor = 200;
+		int noCrashFactor = 250;
+		int delayPenalty = 0;
+		if(r.getAvoidMethod().getClass() == AvoidByDelay.class) {
+			delayPenalty = -100;
+		}
 		if(r.getNextCollision() != null) { 
 			noCrashFactor = 0;
 			nextCrashRound = r.getNextCollision().getRound();
 		}
 		int crashFactor = 5 * (nextCrashRound - r.getPreviousCollision().getRound());
 		
-		return adjustedSteps + crashFactor + noCrashFactor; 
+		return adjustedSteps + crashFactor + noCrashFactor + delayPenalty; 
 	}
 	
 	protected ArrayList<AvoidResult> avoidResultsByHeuristic(ArrayList<AvoidResult> results) {
@@ -172,8 +224,10 @@ public class SimplePathCalculator extends PathCalculator{
 		ArrayList<PlanePath> paths = new ArrayList<PlanePath>();
 		paths.add(a);
 		paths.add(b);
-		HashMap<Plane, PlanePath> waypointHashCopy = PlaneUtil.waypointMapWithPaths(waypointHash, paths);
-		WaypointSimulationResult result = new WaypointSimulator(waypointHashCopy).startWaypointSimulation(0);
+		
+		// run the simulation only with the passed paths
+		HashMap<Plane, PlanePath> hash = PlaneUtil.waypointMapWithPaths(paths);
+		WaypointSimulationResult result = new WaypointSimulator(hash).startWaypointSimulation(0);
 		return result;
 	}
 		

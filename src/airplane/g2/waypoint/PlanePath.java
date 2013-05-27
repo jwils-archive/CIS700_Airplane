@@ -138,10 +138,14 @@ public class PlanePath {
 	}
 	
 	public double getBearing(int timestep) {
+		return getBearing(getPlane(), timestep);
+	}
+	
+	public double getBearing(Plane aPlane, int timestep) {
 		setSegmentForLastBearingRequest(-1);
 		
 		if (timestep < startTimestep) return -1;
-		if (timestep > getArrivalStep()) return calculateBearing(getPlane().getLocation(), waypoints.get(waypoints.size() - 1));
+		if (timestep > getArrivalStep()) return calculateBearing(aPlane.getLocation(), waypoints.get(waypoints.size() - 1));
 		int savedTime = startTimestep;
 		int segment = 0;
 		
@@ -154,7 +158,7 @@ public class PlanePath {
 		
 		setSegmentForLastBearingRequest(segment);
 		
-		return calculateBearing(getPlane().getLocation(), waypoints.get(segment + 1));
+		return calculateBearing(aPlane.getLocation(), waypoints.get(segment + 1));
 		
 	}
 	
