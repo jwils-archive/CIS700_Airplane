@@ -1,8 +1,12 @@
 package airplane.g2.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 
 import airplane.g2.PlanePair;
+import airplane.g2.waypoint.PlanePath;
 import airplane.sim.Plane;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -179,5 +183,38 @@ public class PlaneUtil {
 	
 	public static Point2D.Double midpointBetweenPlanes(Plane a, Plane b) {
 		return PointUtil.midpoint(a.getLocation(), b.getLocation());
+	}
+	
+	public static ArrayList<Plane> planesSortedByIndex(ArrayList<Plane> planes) {
+		ArrayList<Plane> sorted = new ArrayList<Plane>(planes);
+		Collections.sort(sorted, new Comparator<Plane>(){
+			@Override
+			public int compare(Plane arg0, Plane arg1) {
+				return ((Integer) arg0.id).compareTo(arg1.id);
+			}
+		});
+		return sorted;
+	}
+	
+	public static ArrayList<PlanePath> planePathsSortedByIndex(ArrayList<PlanePath> paths) {
+		ArrayList<PlanePath> sorted = new ArrayList<PlanePath>(paths);
+		Collections.sort(sorted, new Comparator<PlanePath>() {
+			@Override
+			public int compare(PlanePath o1, PlanePath o2) {
+				return ((Integer) o1.getPlane().id).compareTo(o2.getPlane().id);
+			}
+		});
+		return sorted;
+	}
+	
+	public static HashMap<Plane, PlanePath> waypointMapWithPaths(
+			HashMap<Plane, PlanePath> waypointHash, ArrayList<PlanePath> paths) {
+		HashMap<Plane, PlanePath> waypointHashCopy = new HashMap<Plane, PlanePath>(waypointHash);
+		ArrayList<Plane> planes = planesSortedByIndex(new ArrayList<Plane>(waypointHash.keySet()));
+		for(PlanePath path: paths) {
+			Plane p = planes.get(path.getPlane().id);
+			waypointHashCopy.put(p, path);
+		}
+		return waypointHashCopy;
 	}
 }
