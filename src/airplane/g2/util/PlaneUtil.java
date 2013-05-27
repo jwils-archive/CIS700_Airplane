@@ -148,12 +148,18 @@ public class PlaneUtil {
 			for(int j = i + 1; j < count; j++) {
 				double dist = distances[i][j];
 				if(dist > distanceThreshold) continue;
+				if(!inFlight(planes.get(i))) continue;
+				if(!inFlight(planes.get(j))) continue;
 				
 				collisionPairs.add(new PlanePair(i, planes.get(i), j, planes.get(j), dist));
 			}
 		}
 		return collisionPairs;
 	}	
+	
+	public static Boolean inFlight(Plane p) {
+		return p.getBearing() >= 0;
+	}
 	
 	public static double normalizedBearing(double bearing) {
 		return (bearing + 360) % 360;
@@ -207,7 +213,7 @@ public class PlaneUtil {
 		return sorted;
 	}
 	
-	public static HashMap<Plane, PlanePath> waypointMapWithPaths(
+	public static HashMap<Plane, PlanePath> waypointMapWithReplacingPaths(
 			HashMap<Plane, PlanePath> waypointHash, ArrayList<PlanePath> paths) {
 		HashMap<Plane, PlanePath> waypointHashCopy = new HashMap<Plane, PlanePath>(waypointHash);
 		ArrayList<Plane> planes = planesSortedByIndex(new ArrayList<Plane>(waypointHash.keySet()));
@@ -216,5 +222,13 @@ public class PlaneUtil {
 			waypointHashCopy.put(p, path);
 		}
 		return waypointHashCopy;
+	}
+	
+	public static HashMap<Plane, PlanePath> waypointMapWithPaths(ArrayList<PlanePath> paths) {
+		HashMap<Plane, PlanePath> waypointHash = new HashMap<Plane, PlanePath>();
+		for(PlanePath path: paths) {
+			waypointHash.put(path.getPlane(), path);
+		}
+		return waypointHash;
 	}
 }
