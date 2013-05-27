@@ -1,5 +1,6 @@
 package airplane.g2.waypoint;
 
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
@@ -219,5 +220,13 @@ public class PlanePath {
 	public void setSegmentForLastBearingRequest(
 			Integer segmentForLastBearingRequest) {
 		this.segmentForLastBearingRequest = segmentForLastBearingRequest;
+	}
+	
+	public Point2D.Double waypointAt(int index) {
+		return waypoints.get(index);
+	}
+	
+	public Line2D.Double segmentAt(int index) {
+		return new Line2D.Double(waypointAt(index), waypointAt(index + 1));
 	}
 }
