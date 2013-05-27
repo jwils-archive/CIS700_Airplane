@@ -1,6 +1,8 @@
 package airplane.g2.waypoint;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import airplane.g2.sim.Simulator;
@@ -13,9 +15,20 @@ public class WaypointSimulator extends Simulator {
 		setWaypointHash(waypointHash);
 	}
 	
-	public WaypointSimulationResult startWaypointSimulation(ArrayList<Plane> planes, int round) {
-		SimulationResult result = startSimulation(planes, round);
+	public WaypointSimulationResult startWaypointSimulation(int round) {
+		SimulationResult result = startSimulation(getPlanesByIndex(), round);
 		return new WaypointSimulationResult(result);
+	}
+	
+	protected ArrayList<Plane> getPlanesByIndex() {
+		ArrayList<Plane> sorted = new ArrayList<Plane>(waypointHash.keySet());
+		Collections.sort(sorted, new Comparator<Plane>(){
+			@Override
+			public int compare(Plane arg0, Plane arg1) {
+				return ((Integer) arg0.id).compareTo(arg1.id);
+			}
+		});
+		return sorted;
 	}
 	
 	protected double[] simulateUpdate(ArrayList<Plane> planes, int round, double[] bearings) {

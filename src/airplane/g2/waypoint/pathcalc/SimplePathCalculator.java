@@ -16,6 +16,8 @@ import org.apache.log4j.Logger;
 
 import airplane.g2.waypoint.PlaneCollision;
 import airplane.g2.waypoint.PlanePath;
+import airplane.g2.waypoint.WaypointSimulationResult;
+import airplane.g2.waypoint.WaypointSimulator;
 import airplane.sim.Plane;
 
 public class SimplePathCalculator extends PathCalculator{
@@ -33,6 +35,11 @@ public class SimplePathCalculator extends PathCalculator{
 		if(x == limit) {
 			logger.warn("There will be a crash!");
 		}
+	}
+	
+	public WaypointSimulationResult simulate(HashMap<Plane, PlanePath> waypointHash) {
+		WaypointSimulator sim = new WaypointSimulator(waypointHash);
+		return sim.startWaypointSimulation(0);
 	}
 	
 	public ArrayList<PlaneCollision> collisionsInHash(HashMap<Plane, PlanePath> waypointHash) {
