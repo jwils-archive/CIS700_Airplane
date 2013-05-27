@@ -1,6 +1,7 @@
 package airplane.g2.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -212,9 +213,14 @@ public class PlaneUtil {
 		});
 		return sorted;
 	}
-	
 	public static HashMap<Plane, PlanePath> waypointMapWithReplacingPaths(
-			HashMap<Plane, PlanePath> waypointHash, ArrayList<PlanePath> paths) {
+			HashMap<Plane, PlanePath> waypointHash, PlanePath[] paths) {
+		ArrayList<PlanePath> p = new ArrayList<PlanePath>();
+		Collections.addAll(p, paths);
+		return waypointMapWithReplacingPaths(waypointHash, p);
+	}
+	public static HashMap<Plane, PlanePath> waypointMapWithReplacingPaths(
+			HashMap<Plane, PlanePath> waypointHash, Collection<PlanePath> paths) {
 		HashMap<Plane, PlanePath> waypointHashCopy = new HashMap<Plane, PlanePath>(waypointHash);
 		ArrayList<Plane> planes = planesSortedByIndex(new ArrayList<Plane>(waypointHash.keySet()));
 		for(PlanePath path: paths) {
