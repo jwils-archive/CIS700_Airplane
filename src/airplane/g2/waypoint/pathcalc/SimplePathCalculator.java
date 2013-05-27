@@ -145,15 +145,19 @@ public class SimplePathCalculator extends PathCalculator{
 					collision.getPath1(), collision.getPath2(), collision);
 			
 			int stepForAvoidMethod = slowestArrivalStep(pathsForAvoidMethod);
-			WaypointSimulationResult simResult = collidePlanePaths(waypointHash,
+			WaypointSimulationResult simResultLocal = collidePlanePaths(waypointHash,
 					pathsForAvoidMethod[0], pathsForAvoidMethod[1]);
+			WaypointSimulationResult simResultGlobal = 
+					simulate(PlaneUtil.waypointMapWithReplacingPaths(waypointHash, pathsForAvoidMethod));
 			
 			// don't consider results that aren't either a collision or success
-			if(simResult.wasStopped()) continue;
-			if(!(simResult.isCollision() || simResult.isSuccess())) continue;
+			if(simResultLocal.wasStopped()) continue;
+			if(!(simResultLocal.isCollision() || simResultLocal.isSuccess())) continue;
 			
 			AvoidResult result = new AvoidResult(avoid, pathsForAvoidMethod, 
-					stepForAvoidMethod, collision, simResult.getCollision());
+					stepForAvoidMethod, collision, 
+					simResultLocal.getCollision(),
+					simResultGlobal.isCollision() ? simResultGlobal.getCollision() : null);
 			
 			results.add(result);
 		}
@@ -193,16 +197,17 @@ public class SimplePathCalculator extends PathCalculator{
 		// bonus points if we don't crash
 		int noCrashFactor = 250;
 		int delayPenalty = 0;
-		if(r.getAvoidMethod().getClass() == AvoidByDelay.class) {
-			delayPenalty = -100;
-		}
+		int globalCollisionCrashFactor = r.getNextGlobalCollision() == null ? 200 : 0;
+//		if(r.getAvoidMethod().getClass() == AvoidByDelay.class) {
+//			delayPenalty = -100;
+//		}
 		if(r.getNextCollision() != null) { 
 			noCrashFactor = 0;
 			nextCrashRound = r.getNextCollision().getRound();
 		}
 		int crashFactor = 5 * (nextCrashRound - r.getPreviousCollision().getRound());
 		
-		return adjustedSteps + crashFactor + noCrashFactor + delayPenalty; 
+		return adjustedSteps + crashFactor + noCrashFactor + delayPenalty + globalCollisionCrashFactor; 
 	}
 	
 	protected ArrayList<AvoidResult> avoidResultsByHeuristic(ArrayList<AvoidResult> results) {
