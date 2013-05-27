@@ -20,6 +20,11 @@ public class WaypointSimulator extends Simulator {
 		SimulationResult result = startSimulation(getPlanesByIndex(), round);
 		WaypointSimulationResult waypointResult = new WaypointSimulationResult(result);
 		waypointResult.setWaypointHash(waypointHash);
+		// ids don't get set
+		int i = 0;
+		for(Plane p: waypointResult.getPlanes()) {
+			p.id = i; i++;
+		}
 		return waypointResult;
 	}
 	
@@ -35,8 +40,9 @@ public class WaypointSimulator extends Simulator {
 		// Group2WaypointPlayer class.
 		for (int i = 0; i < planes.size(); i++) { 
 			if (bearings[i] == -2) continue;
+			Plane plane = planes.get(i);
 			PlanePath path = waypointHash.get(canonicalPlanes.get(i));
-			double newBearing = path.getBearing(round);
+			double newBearing = path.getBearing(plane, round);
 			
 			if (bearings[i] >= 0 && Math.abs(newBearing - bearings[i]) > 9.5) {
 				if ( (newBearing > bearings[i] && newBearing - bearings[i] < 180) || (newBearing < bearings[i] && newBearing - bearings[i] > 180)) {
