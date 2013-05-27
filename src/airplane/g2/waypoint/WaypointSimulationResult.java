@@ -67,15 +67,21 @@ public class WaypointSimulationResult extends SimulationResult {
 	}
 	
 	protected void loadCollision() {
-		if(! isCollision()) return;
+		if(! isCollision()) {
+			setCollision(null);
+			return;
+		}
 		
 		PlanePair pair = getCollidingPairs().get(0);
 		
 		PlaneCollision collision = new PlaneCollision();
-		collision.setPath1(pathAt(pair.getFirstIndex()));
-		collision.setPath2(pathAt(pair.getSecondIndex()));
-		collision.setPlane1segment(0);
-		collision.setPlane2segment(0);
+		PlanePath path1 = pathAt(pair.getFirstIndex());
+		PlanePath path2 = pathAt(pair.getSecondIndex());
+		collision.setPath1(path1);
+		collision.setPath2(path2);
+		collision.setPlane1segment(path1.getSegmentForLastBearingRequest());
+		collision.setPlane2segment(path2.getSegmentForLastBearingRequest());
+		
 		Point2D.Double collisionPoint = null;
 		collision.setCollisionPoint(collisionPoint);
 		collision.setRound(getRound());
