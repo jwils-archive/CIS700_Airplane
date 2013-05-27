@@ -37,14 +37,8 @@ public class WaypointSimulationResult extends SimulationResult {
 	}
 	
 	protected ArrayList<PlanePath> pathsByIndex() {
-		ArrayList<PlanePath> sorted = new ArrayList<PlanePath>(waypointHash.values());
-		Collections.sort(sorted, new Comparator<PlanePath>() {
-			@Override
-			public int compare(PlanePath o1, PlanePath o2) {
-				return ((Integer) o1.getPlane().id).compareTo(o2.getPlane().id);
-			}
-		});
-		return sorted;
+		return PlaneUtil.planePathsSortedByIndex(
+				new ArrayList<PlanePath>(waypointHash.values()));
 	}
 
 	public PlaneCollision getCollision() {

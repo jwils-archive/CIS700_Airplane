@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 
 import airplane.g2.sim.Simulator;
+import airplane.g2.util.PlaneUtil;
 import airplane.sim.Plane;
 import airplane.sim.SimulationResult;
 
@@ -23,14 +24,7 @@ public class WaypointSimulator extends Simulator {
 	}
 	
 	protected ArrayList<Plane> getPlanesByIndex() {
-		ArrayList<Plane> sorted = new ArrayList<Plane>(waypointHash.keySet());
-		Collections.sort(sorted, new Comparator<Plane>(){
-			@Override
-			public int compare(Plane arg0, Plane arg1) {
-				return ((Integer) arg0.id).compareTo(arg1.id);
-			}
-		});
-		return sorted;
+		return PlaneUtil.planesSortedByIndex(new ArrayList<Plane>(waypointHash.keySet()));
 	}
 	
 	protected double[] simulateUpdate(ArrayList<Plane> planes, int round, double[] bearings) {
