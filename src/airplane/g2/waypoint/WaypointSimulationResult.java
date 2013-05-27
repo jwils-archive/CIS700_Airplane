@@ -82,11 +82,16 @@ public class WaypointSimulationResult extends SimulationResult {
 		collision.setPlane1segment(path1.getSegmentForLastBearingRequest());
 		collision.setPlane2segment(path2.getSegmentForLastBearingRequest());
 		
-		Point2D.Double collisionPoint = null;
-		collision.setCollisionPoint(collisionPoint);
+		collision.setCollisionPoint(collisionPointForPair(pair));
 		collision.setRound(getRound());
 		
 		setCollision(collision);
+	}
+	
+	protected Point2D.Double collisionPointForPair(PlanePair pair) {
+		return PlaneUtil.midpointBetweenPlanes(
+				planeAt(pair.getFirstIndex()), 
+				planeAt(pair.getSecondIndex()));
 	}
 
 	public double[][] getDistances() {
@@ -115,6 +120,10 @@ public class WaypointSimulationResult extends SimulationResult {
 	
 	public Boolean isCollision() {
 		return getReason() == SimulationResult.TOO_CLOSE;
+	}
+	
+	protected Plane planeAt(int index) {
+		return getPlanes().get(index);
 	}
 
 }
