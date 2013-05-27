@@ -10,10 +10,14 @@ public class AvoidResult {
 	private int steps;
 	private PlaneCollision previousCollision;
 	private PlaneCollision nextCollision;
+	private PlaneCollision nextGlobalCollision;
 	private int heuristicValue;
 	
 	public AvoidResult(AvoidMethod avoidMethod, PlanePath[] paths, 
-			int steps, PlaneCollision previousCollision, PlaneCollision nextCollision) {
+			int steps, 
+			PlaneCollision previousCollision, 
+			PlaneCollision nextCollision,
+			PlaneCollision nextGlobalCollision) {
 		setSteps(steps);
 		setAvoidMethod(avoidMethod);
 		setPaths(paths);
@@ -71,5 +75,13 @@ public class AvoidResult {
 	
 	public String toString() {
 		return String.format("AvoidResult (Steps: %d, Heuristic: %d) %s", steps, getHeuristicValue(), getAvoidMethod().toString());
+	}
+
+	public PlaneCollision getNextGlobalCollision() {
+		return nextGlobalCollision;
+	}
+
+	public void setNextGlobalCollision(PlaneCollision nextGlobalCollision) {
+		this.nextGlobalCollision = nextGlobalCollision;
 	}
 }
