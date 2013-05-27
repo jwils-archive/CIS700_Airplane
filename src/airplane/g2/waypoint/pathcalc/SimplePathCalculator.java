@@ -149,6 +149,7 @@ public class SimplePathCalculator extends PathCalculator{
 					pathsForAvoidMethod[0], pathsForAvoidMethod[1]);
 			
 			// don't consider results that aren't either a collision or success
+			if(simResult.wasStopped()) continue;
 			if(!(simResult.isCollision() || simResult.isSuccess())) continue;
 			
 			AvoidResult result = new AvoidResult(avoid, pathsForAvoidMethod, 

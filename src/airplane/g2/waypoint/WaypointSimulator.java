@@ -12,11 +12,13 @@ import airplane.sim.SimulationResult;
 
 public class WaypointSimulator extends Simulator {
 	private HashMap<Plane, PlanePath> waypointHash;
+	private int updateCount;
 	public WaypointSimulator(HashMap<Plane, PlanePath> waypointHash) {
 		setWaypointHash(waypointHash);
 	}
 	
 	public WaypointSimulationResult startWaypointSimulation(int round) {
+		updateCount = 0;
 		SimulationResult result = startSimulation(getPlanesByIndex(), round);
 		WaypointSimulationResult waypointResult = new WaypointSimulationResult(result);
 		waypointResult.setWaypointHash(waypointHash);
@@ -33,6 +35,8 @@ public class WaypointSimulator extends Simulator {
 	}
 	
 	protected double[] simulateUpdate(ArrayList<Plane> planes, int round, double[] bearings) {
+		updateCount ++;
+		if(updateCount > 10000) continueSimulation = false;
 		
 		ArrayList<Plane> canonicalPlanes = getPlanesByIndex();
 		

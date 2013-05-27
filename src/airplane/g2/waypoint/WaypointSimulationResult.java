@@ -116,6 +116,10 @@ public class WaypointSimulationResult extends SimulationResult {
 		return getReason() == SimulationResult.TOO_CLOSE;
 	}
 	
+	public Boolean wasStopped() {
+		return getReason() == SimulationResult.STOPPED;
+	}
+	
 	protected Plane planeAt(int index) {
 		return getPlanes().get(index);
 	}
