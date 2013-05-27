@@ -68,4 +68,8 @@ public class AvoidResult {
 	public void setHeuristicValue(int heuristicValue) {
 		this.heuristicValue = heuristicValue;
 	}
+	
+	public String toString() {
+		return String.format("AvoidResult (Steps: %d, Heuristic: %d) %s", steps, getHeuristicValue(), getAvoidMethod().toString());
+	}
 }
