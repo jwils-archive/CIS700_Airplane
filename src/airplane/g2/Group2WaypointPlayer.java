@@ -43,14 +43,20 @@ public class Group2WaypointPlayer extends airplane.sim.Player {
 			double newBearing = path.getBearing(round);
 			
 			if (bearings[i] >= 0 && Math.abs(newBearing - bearings[i]) > 9.5) {
-				if ( (newBearing > bearings[i] && newBearing - bearings[i] < 180) || (newBearing < bearings[i] && newBearing - bearings[i] > 180)) {
-					bearings[i] = (bearings[i] + 9.5) % 360;
-				} else {
-					bearings[i] = (bearings[i] - 9.5 + 360) % 360;
-				}
-			} else {
-				bearings[i] = newBearing;
+				logger.error("Ark too large:" + path);
+				logger.error("Path:" + path.getPlane().getLocation());
+				path.getBearing(round);
 			}
+			bearings[i] = newBearing;
+//			if (bearings[i] >= 0 && Math.abs(newBearing - bearings[i]) > 9.5) {
+//				if ( (newBearing > bearings[i] && newBearing - bearings[i] < 180) || (newBearing < bearings[i] && newBearing - bearings[i] > 180)) {
+//					bearings[i] = (bearings[i] + 9.5) % 360;
+//				} else {
+//					bearings[i] = (bearings[i] - 9.5 + 360) % 360;
+//				}
+//			} else {
+//				bearings[i] = newBearing;
+//			}
 		}
 		return bearings;
 	}

@@ -213,13 +213,15 @@ public class SimplePathCalculator extends PathCalculator{
 	public ArrayList<AvoidMethod> getAvoidMethods() {
 		ArrayList<AvoidMethod> methods = new ArrayList<AvoidMethod>();
 		
+		for(int delay: new int[]{5, 10, 20}) {
+			methods.add(new AvoidByDelay(PlaneIndex.PLANE_TWO, delay));
+		}
+		
 		methods.addAll(getCompassMoveMethodsOfMagnitude(PlaneIndex.PLANE_TWO, 5.1));
 		methods.addAll(getCompassMoveMethodsOfMagnitude(PlaneIndex.PLANE_TWO, 9));
 		methods.addAll(getCompassMoveMethodsOfMagnitude(PlaneIndex.PLANE_TWO, 10));
 		
-		for(int delay: new int[]{5, 10, 20}) {
-			methods.add(new AvoidByDelay(PlaneIndex.PLANE_TWO, delay));
-		}
+		
 		
 		return methods;
 	}
