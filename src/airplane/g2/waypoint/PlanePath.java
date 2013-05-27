@@ -84,8 +84,8 @@ public class PlanePath {
 		return getPlaneCollision(otherPath).getCollisionPoint();
 	}
 	
-	public int getArrivalStep() {
-		int totaltime = startTimestep;
+	public Double getArrivalStepRaw() {
+	int totaltime = startTimestep;
 		int segment = 0;
 		
 		double distance = waypoints.get(segment).distance(waypoints.get(segment + 1));
@@ -95,7 +95,11 @@ public class PlanePath {
 			distance = waypoints.get(segment).distance(waypoints.get(segment + 1));
 		}
 		
-		return (int) (totaltime + distance) + 1;
+		return totaltime + distance;
+	}
+	
+	public int getArrivalStep() {
+		return getArrivalStepRaw().intValue() + 1;
 	}
 	
 	

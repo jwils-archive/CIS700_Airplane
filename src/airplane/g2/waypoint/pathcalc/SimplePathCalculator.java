@@ -125,11 +125,11 @@ public class SimplePathCalculator extends PathCalculator{
 		return PlaneUtil.planesAreEqual(p1, p2);
 	}
 	
-	public int slowestArrivalStep(PlanePath[] paths) {
-		Integer slowest = Integer.MIN_VALUE;
+	public Double slowestArrivalStep(PlanePath[] paths) {
+		Double slowest = Double.MIN_VALUE;
 		for(PlanePath path: paths) {
 			if(path.getArrivalStep() > slowest) {
-				slowest = path.getArrivalStep();
+				slowest = path.getArrivalStepRaw();
 			}
 		}
 		return slowest;
@@ -144,7 +144,7 @@ public class SimplePathCalculator extends PathCalculator{
 			PlanePath[] pathsForAvoidMethod = avoid.avoid(
 					collision.getPath1(), collision.getPath2(), collision);
 			
-			int stepForAvoidMethod = slowestArrivalStep(pathsForAvoidMethod);
+			int stepForAvoidMethod = slowestArrivalStep(pathsForAvoidMethod).intValue();
 			WaypointSimulationResult simResultLocal = collidePlanePaths(waypointHash,
 					pathsForAvoidMethod[0], pathsForAvoidMethod[1]);
 			WaypointSimulationResult simResultGlobal = 
@@ -190,9 +190,9 @@ public class SimplePathCalculator extends PathCalculator{
 		return filtered;
 	}
 	
-	protected Integer avoidResultHeuristicValue(AvoidResult r) {
+	protected Double avoidResultHeuristicValue(AvoidResult r) {
 		// we want the heuristic to be greater the better it is
-		int adjustedSteps = 1000-slowestArrivalStep(r.getPaths());
+		double adjustedSteps = 1000-slowestArrivalStep(r.getPaths());
 		int nextCrashRound = 0;
 		// bonus points if we don't crash
 		int noCrashFactor = 250;
@@ -218,7 +218,7 @@ public class SimplePathCalculator extends PathCalculator{
 			public int compare(AvoidResult arg0, AvoidResult arg1) {
 				arg0.setHeuristicValue(avoidResultHeuristicValue(arg0));
 				arg1.setHeuristicValue(avoidResultHeuristicValue(arg1));
-				return ((Integer)arg0.getHeuristicValue()).compareTo(arg1.getHeuristicValue());
+				return (arg0.getHeuristicValue()).compareTo(arg1.getHeuristicValue());
 			}
 		});
 		
