@@ -229,4 +229,8 @@ public class PlanePath {
 	public Line2D.Double segmentAt(int index) {
 		return new Line2D.Double(waypointAt(index), waypointAt(index + 1));
 	}
+	
+	public Integer getPlaneId() {
+		return getPlane().id;
+	}
 }
