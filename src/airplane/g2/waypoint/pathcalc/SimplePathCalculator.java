@@ -28,9 +28,13 @@ public class SimplePathCalculator extends PathCalculator{
 	public void calculatePaths(HashMap<Plane, PlanePath> waypointHash) {
 		int x = 0, limit = 1000;
 		for(; x < limit; x++) {
-			PlaneCollision collision = soonestCollision(collisionsInHash(waypointHash));
-			if(collision == null) break;
-			putPaths(waypointHash, planePathsDidCollide(collision));
+			// always simulate from the beginning
+			WaypointSimulationResult result = new WaypointSimulator(waypointHash).startWaypointSimulation(0);
+			if(result.isCollision()) {
+				putPaths(waypointHash, planePathsDidCollide(result.getCollision()));
+			} else {
+				break;
+			}
 		}
 		if(x == limit) {
 			logger.warn("There will be a crash!");

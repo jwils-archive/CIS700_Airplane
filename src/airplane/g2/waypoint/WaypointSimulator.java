@@ -34,11 +34,14 @@ public class WaypointSimulator extends Simulator {
 	}
 	
 	protected double[] simulateUpdate(ArrayList<Plane> planes, int round, double[] bearings) {
+		
+		ArrayList<Plane> canonicalPlanes = getPlanesByIndex();
+		
 		//TODO - this is a copy of the updateSimulation method from the
 		// Group2WaypointPlayer class.
 		for (int i = 0; i < planes.size(); i++) { 
 			if (bearings[i] == -2) continue;
-			PlanePath path = waypointHash.get(planes.get(i));
+			PlanePath path = waypointHash.get(canonicalPlanes.get(i));
 			double newBearing = path.getBearing(round);
 			
 			if (bearings[i] >= 0 && Math.abs(newBearing - bearings[i]) > 9.5) {
