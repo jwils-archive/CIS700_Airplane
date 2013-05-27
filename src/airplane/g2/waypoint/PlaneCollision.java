@@ -67,5 +67,11 @@ public class PlaneCollision {
 		this.round = round;
 	}
 	
+	public Integer getPlaneId1() {
+		return getPath1().getPlaneId();
+	}
+	public Integer getPlaneId2() {
+		return getPath2().getPlaneId();
+	}
 	
 }
