@@ -264,13 +264,23 @@ public class SimplePathCalculator extends PathCalculator{
 	public ArrayList<AvoidMethod> getAvoidMethods() {
 		ArrayList<AvoidMethod> methods = new ArrayList<AvoidMethod>();
 		
-		methods.addAll(getCompassMoveMethodsOfMagnitude(PlaneIndex.PLANE_TWO, 5.1));
-		methods.addAll(getCompassMoveMethodsOfMagnitude(PlaneIndex.PLANE_TWO, 9));
-		methods.addAll(getCompassMoveMethodsOfMagnitude(PlaneIndex.PLANE_TWO, 10));
+//		methods.add(new AvoidByMove(PlaneIndex.PLANE_TWO, new Point2D.Double(10, 0)));
+//		methods.add(new AvoidByMove(PlaneIndex.PLANE_TWO, new Point2D.Double(0, 10)));
+//		methods.add(new AvoidByMove(PlaneIndex.PLANE_TWO, new Point2D.Double(-10, 0)));
+//		methods.add(new AvoidByMove(PlaneIndex.PLANE_TWO, new Point2D.Double(0, -10)));
+//		methods.add(new AvoidByDelay(PlaneIndex.PLANE_TWO, 10));
 		
-		for(int delay: new int[]{5, 10, 20}) {
-			methods.add(new AvoidByDelay(PlaneIndex.PLANE_TWO, delay));
+		for(PlaneIndex index: new PlaneIndex[]{PlaneIndex.PLANE_TWO}) {
+			methods.addAll(getCompassMoveMethodsOfMagnitude(index, 5.1));
+			methods.addAll(getCompassMoveMethodsOfMagnitude(index, 20));
+			methods.addAll(getCompassMoveMethodsOfMagnitude(index, 10));
+			methods.addAll(getCompassMoveMethodsOfMagnitude(index, 15));
+			
+			for(int delay: new int[]{10, 20}) {
+				methods.add(new AvoidByDelay(index, delay));
+			}	
 		}
+		
 		
 		return methods;
 	}
