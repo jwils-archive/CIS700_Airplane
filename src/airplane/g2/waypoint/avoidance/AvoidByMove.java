@@ -49,4 +49,8 @@ public class AvoidByMove extends AvoidMethod {
 				bound(wayPoint.x, minX, maxX), 
 				bound(wayPoint.y, minY, maxY));
 	}
+	
+	public String toString() {
+		return String.format("AvoidByMove (%f, %f)", moveAmount.x, moveAmount.y);
+	}
 }

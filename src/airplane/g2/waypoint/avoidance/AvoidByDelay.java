@@ -26,4 +26,7 @@ public class AvoidByDelay extends AvoidMethod {
 		return new PlanePath[]{outPath1, outPath2};
 	}
 
+	public String toString() {
+		return String.format("AvoidByDelay %d steps", delayAmount);
+	}
 }
