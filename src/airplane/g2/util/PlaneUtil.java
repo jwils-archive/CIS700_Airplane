@@ -177,7 +177,7 @@ public class PlaneUtil {
 		return a.id == b.id;
 	}
 	
-	public static Point2D.Double addPoints(Point2D.Double a, Point2D.Double b) {
-		return new Point2D.Double(a.x + b.x, a.y + b.y);
+	public static Point2D.Double midpointBetweenPlanes(Plane a, Plane b) {
+		return PointUtil.midpoint(a.getLocation(), b.getLocation());
 	}
 }
