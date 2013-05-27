@@ -1,15 +1,24 @@
 package airplane.g2.waypoint;
 
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
+import airplane.g2.PlanePair;
+import airplane.g2.util.PlaneUtil;
 import airplane.sim.Plane;
 import airplane.sim.SimulationResult;
 
 public class WaypointSimulationResult extends SimulationResult {
 	
 	private HashMap<Plane, PlanePath> waypointHash;
+	private ArrayList<PlanePath> paths;
 	private PlaneCollision collision;
+	private ArrayList<PlanePair> collidingPairs;
+	private double[][] distances;
+	private static Double collideThreshold = 10.01;
 
 	public WaypointSimulationResult(int _reason, int _round,
 			ArrayList<Plane> _planes) {
@@ -19,6 +28,23 @@ public class WaypointSimulationResult extends SimulationResult {
 	
 	public WaypointSimulationResult(SimulationResult result) {
 		super(result.getReason(), result.getRound(), result.getPlanes());
+		setDistances(PlaneUtil.getDistances(result.getPlanes()));
+		setCollidingPairs(PlaneUtil.detectCollisions(result.getPlanes(), collideThreshold));
+	}
+	
+	protected PlanePath pathAt(int index) {
+		return paths.get(index);
+	}
+	
+	protected ArrayList<PlanePath> pathsByIndex() {
+		ArrayList<PlanePath> sorted = new ArrayList<PlanePath>(waypointHash.values());
+		Collections.sort(sorted, new Comparator<PlanePath>() {
+			@Override
+			public int compare(PlanePath o1, PlanePath o2) {
+				return ((Integer) o1.getPlane().id).compareTo(o2.getPlane().id);
+			}
+		});
+		return sorted;
 	}
 
 	public PlaneCollision getCollision() {
@@ -35,6 +61,54 @@ public class WaypointSimulationResult extends SimulationResult {
 
 	public void setWaypointHash(HashMap<Plane, PlanePath> waypointHash) {
 		this.waypointHash = waypointHash;
+		this.paths = pathsByIndex();
+		
+		loadCollision();
+	}
+	
+	protected void loadCollision() {
+		if(! isCollision()) return;
+		
+		PlanePair pair = getCollidingPairs().get(0);
+		
+		PlaneCollision collision = new PlaneCollision();
+		collision.setPath1(pathAt(pair.getFirstIndex()));
+		collision.setPath2(pathAt(pair.getSecondIndex()));
+		collision.setPlane1segment(0);
+		collision.setPlane2segment(0);
+		Point2D.Double collisionPoint = null;
+		collision.setCollisionPoint(collisionPoint);
+		collision.setRound(getRound());
+		
+		setCollision(collision);
+	}
+
+	public double[][] getDistances() {
+		return distances;
+	}
+
+	public void setDistances(double[][] distances) {
+		this.distances = distances;
+	}
+
+	public ArrayList<PlanePair> getCollidingPairs() {
+		return collidingPairs;
+	}
+
+	public void setCollidingPairs(ArrayList<PlanePair> collidingPairs) {
+		this.collidingPairs = collidingPairs;
+	}
+
+	public ArrayList<PlanePath> getPaths() {
+		return paths;
+	}
+
+	public void setPaths(ArrayList<PlanePath> paths) {
+		this.paths = paths;
+	}
+	
+	public Boolean isCollision() {
+		return getReason() == SimulationResult.TOO_CLOSE;
 	}
 
 }

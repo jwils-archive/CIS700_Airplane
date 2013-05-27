@@ -17,7 +17,9 @@ public class WaypointSimulator extends Simulator {
 	
 	public WaypointSimulationResult startWaypointSimulation(int round) {
 		SimulationResult result = startSimulation(getPlanesByIndex(), round);
-		return new WaypointSimulationResult(result);
+		WaypointSimulationResult waypointResult = new WaypointSimulationResult(result);
+		waypointResult.setWaypointHash(waypointHash);
+		return waypointResult;
 	}
 	
 	protected ArrayList<Plane> getPlanesByIndex() {
