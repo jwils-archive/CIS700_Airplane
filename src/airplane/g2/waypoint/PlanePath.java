@@ -10,6 +10,7 @@ import airplane.sim.Plane;
 public class PlanePath {
 	
 	double INTERSECTION_DISTANCE = 10.1;
+	private Integer segmentForLastBearingRequest = -1;
 	
 	ArrayList<Point2D.Double> waypoints;
 	private Plane plane;
@@ -136,6 +137,8 @@ public class PlanePath {
 	}
 	
 	public double getBearing(int timestep) {
+		setSegmentForLastBearingRequest(-1);
+		
 		if (timestep < startTimestep) return -1;
 		if (timestep > getArrivalStep()) return calculateBearing(getPlane().getLocation(), waypoints.get(waypoints.size() - 1));
 		int savedTime = startTimestep;
@@ -147,6 +150,8 @@ public class PlanePath {
 			segment++;
 			distance = waypoints.get(segment).distance(waypoints.get(segment + 1));
 		}
+		
+		setSegmentForLastBearingRequest(segment);
 		
 		return calculateBearing(getPlane().getLocation(), waypoints.get(segment + 1));
 		
@@ -205,5 +210,14 @@ public class PlanePath {
 
 	public void setPlane(Plane plane) {
 		this.plane = plane;
+	}
+
+	public Integer getSegmentForLastBearingRequest() {
+		return segmentForLastBearingRequest;
+	}
+
+	public void setSegmentForLastBearingRequest(
+			Integer segmentForLastBearingRequest) {
+		this.segmentForLastBearingRequest = segmentForLastBearingRequest;
 	}
 }
