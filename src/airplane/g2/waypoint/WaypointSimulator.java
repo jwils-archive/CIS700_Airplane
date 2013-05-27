@@ -36,7 +36,7 @@ public class WaypointSimulator extends Simulator {
 	
 	protected double[] simulateUpdate(ArrayList<Plane> planes, int round, double[] bearings) {
 		updateCount ++;
-		if(updateCount > 10000) continueSimulation = false;
+		if(updateCount > 1000) continueSimulation = false;
 		
 		ArrayList<Plane> canonicalPlanes = getPlanesByIndex();
 		
