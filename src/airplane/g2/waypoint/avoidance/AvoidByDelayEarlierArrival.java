@@ -1,5 +1,8 @@
 package airplane.g2.waypoint.avoidance;
 
+import java.util.ArrayList;
+
+import airplane.g2.util.PlaneUtil;
 import airplane.g2.waypoint.PlaneCollision;
 import airplane.g2.waypoint.PlanePath;
 
@@ -15,13 +18,8 @@ public class AvoidByDelayEarlierArrival extends AvoidByDelay {
 	public PlanePath[] avoid(PlanePath path1, PlanePath path2,
 			PlaneCollision collisonObject) {
 		
-		PlanePath earliestPath = path1;
-		PlanePath latestPath = path2;
-		if(earliestPath.getArrivalStep() > latestPath.getArrivalStep()) {
-			earliestPath = path2;
-			latestPath = path2;
-		}
+		ArrayList<PlanePath> paths = PlaneUtil.pathsSortedByArrivalStep(path1, path2);
 		
-		return super.avoid(earliestPath, latestPath, collisonObject);
+		return super.avoid(paths.get(0), paths.get(1), collisonObject);
 	}
 }

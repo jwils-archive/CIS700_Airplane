@@ -1,7 +1,9 @@
 package airplane.g2.waypoint.avoidance;
 
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
 
+import airplane.g2.util.PlaneUtil;
 import airplane.g2.waypoint.PlaneCollision;
 import airplane.g2.waypoint.PlanePath;
 
@@ -14,14 +16,9 @@ public class AvoidByMoveEarlierArrival extends AvoidByMove {
 	@Override
 	public PlanePath[] avoid(PlanePath path1, PlanePath path2,
 			PlaneCollision collisionObject) {
-		PlanePath earliestPath = path1;
-		PlanePath latestPath = path2;
-		if(earliestPath.getArrivalStep() > latestPath.getArrivalStep()) {
-			earliestPath = path2;
-			latestPath = path2;
-		}
+		ArrayList<PlanePath> paths = PlaneUtil.pathsSortedByArrivalStep(path1, path2);
 		
-		return super.avoid(earliestPath, latestPath, collisionObject);
+		return super.avoid(paths.get(0), paths.get(1), collisionObject);
 	}
 	
 	

@@ -219,6 +219,27 @@ public class PlaneUtil {
 		Collections.addAll(p, paths);
 		return waypointMapWithReplacingPaths(waypointHash, p);
 	}
+
+	public static ArrayList<PlanePath> planePathsReplacingPaths(ArrayList<PlanePath> originalPaths, PlanePath replacement) {
+		ArrayList<PlanePath> copy = new ArrayList<PlanePath>();
+		copy.add(replacement);
+		return planePathsReplacingPaths(originalPaths, copy);
+	}
+	
+	
+	public static ArrayList<PlanePath> planePathsReplacingPaths(ArrayList<PlanePath> originalPaths, ArrayList<PlanePath> replacements) {
+		ArrayList<PlanePath> copy = new ArrayList<PlanePath>(originalPaths);
+		for(PlanePath replace: replacements) {
+			for(int i = 0, size = copy.size(); i < size; i ++) {
+				if(replace.getPlaneId() == copy.get(i).getPlaneId()) {
+					copy.remove(i);
+					copy.add(i, replace);
+				}
+			}
+		}
+		return copy;
+	}
+	
 	public static HashMap<Plane, PlanePath> waypointMapWithReplacingPaths(
 			HashMap<Plane, PlanePath> waypointHash, Collection<PlanePath> paths) {
 		HashMap<Plane, PlanePath> waypointHashCopy = new HashMap<Plane, PlanePath>(waypointHash);
@@ -236,5 +257,33 @@ public class PlaneUtil {
 			waypointHash.put(path.getPlane(), path);
 		}
 		return waypointHash;
+	}
+	
+	public static ArrayList<PlanePath> pathsSortedByArrivalStep(ArrayList<PlanePath> paths) {
+		ArrayList<PlanePath> sorted = new ArrayList<PlanePath>(paths);
+		Collections.sort(sorted, new Comparator<PlanePath>(){
+			@Override
+			public int compare(PlanePath arg0, PlanePath arg1) {
+				// TODO Auto-generated method stub
+				return (arg0.getArrivalStepRaw()).compareTo(arg1.getArrivalStepRaw());
+			}
+		});
+		return sorted;
+	}
+	
+	public static ArrayList<PlanePath> pathsSortedByArrivalStep(PlanePath path1, PlanePath path2) {
+		ArrayList<PlanePath> paths = new ArrayList<PlanePath>();
+		
+		PlanePath earliestPath = path1;
+		PlanePath latestPath = path2;
+		if(earliestPath.getArrivalStep() > latestPath.getArrivalStep()) {
+			earliestPath = path2;
+			latestPath = path2;
+		}
+		
+		paths.add(earliestPath);
+		paths.add(latestPath);
+		
+		return paths;
 	}
 }

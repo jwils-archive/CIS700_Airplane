@@ -6,6 +6,7 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 
 import airplane.g2.waypoint.PlanePath;
+import airplane.g2.waypoint.pathcalc.LockPathCalculator;
 import airplane.g2.waypoint.pathcalc.PathCalculator;
 import airplane.g2.waypoint.pathcalc.SimplePathCalculator;
 import airplane.sim.Plane;
@@ -13,7 +14,7 @@ import airplane.sim.Plane;
 public class Group2WaypointPlayer extends airplane.sim.Player {
 	
 	HashMap<Plane, PlanePath> waypointHash;
-	PathCalculator pathCalculator = new SimplePathCalculator();
+	PathCalculator pathCalculator = new LockPathCalculator();
 	private Logger logger = Logger.getLogger(this.getClass());
 	
 	@Override

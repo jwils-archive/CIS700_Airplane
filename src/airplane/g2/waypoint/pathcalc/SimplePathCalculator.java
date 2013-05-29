@@ -7,6 +7,7 @@ import airplane.g2.waypoint.avoidance.AvoidMethod.PlaneIndex;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,9 +23,9 @@ import airplane.g2.waypoint.WaypointSimulator;
 import airplane.sim.Plane;
 
 public class SimplePathCalculator extends PathCalculator{
-	private Logger logger = Logger.getLogger(this.getClass());
-	private ArrayList<AvoidMethod> avoidMethodsUsed = null;
-
+	protected Logger logger = Logger.getLogger(this.getClass());
+	protected ArrayList<AvoidMethod> avoidMethodsUsed = null;
+	
 	//TODO Better method of adding waypoint.
 	@Override
 	public void calculatePaths(HashMap<Plane, PlanePath> waypointHash) {
@@ -135,6 +136,10 @@ public class SimplePathCalculator extends PathCalculator{
 		return slowest;
 	}
 	
+	public Double slowestArrivalStep(ArrayList<PlanePath> paths) {
+		return slowestArrivalStep(paths.toArray(new PlanePath[paths.size()]));
+	}
+
 	public PlanePath[] planePathsDidCollide(HashMap<Plane, PlanePath> waypointHash, PlaneCollision collision) {
 		ArrayList<AvoidMethod> methods = getAvoidMethods();
 		
@@ -225,16 +230,20 @@ public class SimplePathCalculator extends PathCalculator{
 		return sorted;
 	}
 	
-	public WaypointSimulationResult collidePlanePaths(HashMap<Plane, PlanePath> waypointHash, 
-			PlanePath a, PlanePath b) {
-		ArrayList<PlanePath> paths = new ArrayList<PlanePath>();
-		paths.add(a);
-		paths.add(b);
-		
+	protected WaypointSimulationResult collidePlanePaths( 
+			ArrayList<PlanePath> paths) {		
 		// run the simulation only with the passed paths
 		HashMap<Plane, PlanePath> hash = PlaneUtil.waypointMapWithPaths(paths);
 		WaypointSimulationResult result = new WaypointSimulator(hash).startWaypointSimulation(0);
 		return result;
+	}
+	
+	protected WaypointSimulationResult collidePlanePaths(HashMap<Plane, PlanePath> waypointHash, 
+			PlanePath a, PlanePath b) {
+		ArrayList<PlanePath> paths = new ArrayList<PlanePath>();
+		paths.add(a);
+		paths.add(b);
+		return collidePlanePaths(paths);
 	}
 		
 	public ArrayList<Point2D.Double> getCompassPointsOfMagnitude(double mag) {

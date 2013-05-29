@@ -12,6 +12,7 @@ public class AvoidResult {
 	private PlaneCollision nextCollision;
 	private PlaneCollision nextGlobalCollision;
 	private Double heuristicValue;
+	private PlanePath[] modifiedPaths;
 	
 	public AvoidResult(AvoidMethod avoidMethod, PlanePath[] paths, 
 			int steps, 
@@ -23,6 +24,7 @@ public class AvoidResult {
 		setPaths(paths);
 		setPreviousCollision(previousCollision);
 		setNextCollision(nextCollision);
+		setNextGlobalCollision(nextGlobalCollision);
 	}
 	
 	public PlanePath[] getPaths() {

@@ -101,6 +101,14 @@ public class WaypointSimulationResult extends SimulationResult {
 	}
 
 	public void setCollidingPairs(ArrayList<PlanePair> collidingPairs) {
+		Collections.sort(collidingPairs, new Comparator<PlanePair>() {
+
+			@Override
+			public int compare(PlanePair arg0, PlanePair arg1) {
+				return ((Double) arg0.getDistance()).compareTo(arg1.getDistance());
+			}
+			
+		});
 		this.collidingPairs = collidingPairs;
 	}
 

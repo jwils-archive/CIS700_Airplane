@@ -38,7 +38,7 @@ public class PlanePath {
 	}
 
 	public String toString() {
-		String output = "\nPlane path:\n";
+		String output = String.format("\nPlane %d path:\n", getPlaneId());
 		for (Point2D.Double point : waypoints) {
 			output += point + "\n";
 		}
