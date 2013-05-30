@@ -162,6 +162,9 @@ public class PlanePath {
 		
 		setSegmentForLastBearingRequest(segment);
 		
+		if (segment < waypoints.size() - 2) {
+			return calculateBearing( waypoints.get(segment), waypoints.get(segment + 1));
+		}
 		return calculateBearing(aPlane.getLocation(), waypoints.get(segment + 1));
 		
 	}

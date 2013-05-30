@@ -42,7 +42,9 @@ public class Group2WaypointPlayer extends airplane.sim.Player {
 			if (bearings[i] == -2) continue;
 			PlanePath path = waypointHash.get(planes.get(i));
 			double newBearing = path.getBearing(round);
-			
+//			if (waypointHash.get(planes.get(i)).getPosition(1).x > 70 &&  waypointHash.get(planes.get(i)).getPosition(1).y > 70) {
+//				logger.error("Bearing should be =" + newBearing + " at round " + round);
+//			}
 			if (bearings[i] >= 0 && Math.abs(newBearing - bearings[i]) > 9.5) {
 				if ( (newBearing > bearings[i] && newBearing - bearings[i] < 180) || (newBearing < bearings[i] && newBearing - bearings[i] > 180)) {
 					bearings[i] = (bearings[i] + 9.5) % 360;
@@ -52,6 +54,7 @@ public class Group2WaypointPlayer extends airplane.sim.Player {
 			} else {
 				bearings[i] = newBearing;
 			}
+			//logger.error("bearing set to " + bearings[i]);
 		}
 		return bearings;
 	}

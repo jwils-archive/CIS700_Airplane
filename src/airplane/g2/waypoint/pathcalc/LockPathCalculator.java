@@ -4,6 +4,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
 import airplane.g2.PlanePair;
@@ -12,6 +13,7 @@ import airplane.g2.waypoint.PlanePath;
 import airplane.g2.waypoint.WaypointSimulationResult;
 import airplane.g2.waypoint.avoidance.AvoidByDelay;
 import airplane.g2.waypoint.avoidance.AvoidByMove;
+import airplane.g2.waypoint.avoidance.AvoidByRandomPoint;
 import airplane.g2.waypoint.avoidance.AvoidMethod;
 import airplane.g2.waypoint.avoidance.AvoidMethod.PlaneIndex;
 import airplane.sim.Plane;
@@ -107,6 +109,35 @@ public class LockPathCalculator extends SimplePathCalculator {
 		lockPath(paths.get(0));
 	}
 	
+	protected void minimizeMassCollisions() {
+		ArrayList<PlanePath> sortedByReverseArrival = pathsByReverseArrival();
+		
+		
+	}
+	
+//	protected ArrayList<PlanePath> pathsByCollisionCount() {
+//		ArrayList<PlanePath> planePaths = getPlanePaths();
+//		HashMap<Integer, ArrayList<PlanePath>> collisions = getAllCollisions(planePaths);
+//		
+//		Collections.sort(planePaths, new Comparator<PlanePath>() {
+//
+//			@Override
+//			public int compare(PlanePath o1, PlanePath o2) {
+//				
+//				return 0;
+//			}
+//			
+//		});
+//	}
+	
+	protected HashMap<Integer, ArrayList<PlanePath>> getAllCollisions(ArrayList<PlanePath> paths) {
+		HashMap<Integer, ArrayList<PlanePath>> results = new HashMap<Integer, ArrayList<PlanePath>>();
+		for (PlanePath planePath : paths) {
+			results.put(planePath.getPlaneId(), getAllCollisions(planePath,paths));
+		}
+		return results;
+	}
+	
 	protected Boolean modifyHashLockingFromLatestToEarliest() {
 		ArrayList<PlanePath> sortedByReverseArrival = pathsByReverseArrival();
 		
@@ -142,11 +173,12 @@ public class LockPathCalculator extends SimplePathCalculator {
 		ArrayList<PlanePath> paths = newListWith(getLockedPaths(), path);
 	
 		int i = 0;
-		int delay = 10;
-		int limit = 20;
+		int delay = 2;
+		int limit = 10;
 		WaypointSimulationResult result;
+		path.delay(10);
 		do {
-			path.delay(delay);
+			path.delay(2);
 			result = collidePlanePaths(paths);
 			i++;
 		} while (!result.isSuccess() && i < limit);
@@ -156,6 +188,23 @@ public class LockPathCalculator extends SimplePathCalculator {
 		}
 		
 		return result.isSuccess();
+	}
+	
+	protected ArrayList<PlanePath> getAllCollisions(PlanePath planePath, ArrayList<PlanePath> otherPaths) {
+		ArrayList<PlanePath> results = new ArrayList<PlanePath>();
+		for (PlanePath otherPath : otherPaths) {
+			if (otherPath.getPlaneId() == planePath.getPlaneId()) {
+				continue;
+			}
+			ArrayList<PlanePath> paths = new ArrayList<PlanePath>();
+			paths.add(planePath);
+			paths.add(otherPath);
+			WaypointSimulationResult result = collidePlanePaths(paths);
+			if (!result.isSuccess()) {
+				results.add(otherPath);
+			}
+		}
+		return results;
 	}
 	
 	protected ArrayList<PlanePath> newListWith(ArrayList<PlanePath> paths, PlanePath add) {
@@ -293,6 +342,7 @@ public class LockPathCalculator extends SimplePathCalculator {
 	public ArrayList<AvoidMethod> getAvoidMethods() {
 		ArrayList<AvoidMethod> methods = new ArrayList<AvoidMethod>();
 	
+		//methods.addAll(getCompassMoveMethodsOfMagnitude(2.6));
 		methods.addAll(getCompassMoveMethodsOfMagnitude(5.1));
 		methods.addAll(getCompassMoveMethodsOfMagnitude(20));
 		methods.addAll(getCompassMoveMethodsOfMagnitude(10));
@@ -300,11 +350,15 @@ public class LockPathCalculator extends SimplePathCalculator {
 		methods.addAll(getCompassMoveMethodsOfMagnitude(50));
 		
 		for(PlaneIndex index: new PlaneIndex[]{PlaneIndex.PLANE_ONE}) {
-			for(int delay: new int[]{10, 20, 30, 50, 100, 200}) {
+			for(int delay: new int[]{1,2,3,5,10,20,50,100}) {
 				methods.add(new AvoidByDelay(index, delay));
 			}	
 		}	
 		
+//		methods.add(new AvoidByRandomPoint(PlaneIndex.PLANE_ONE, new Point2D.Double(25, 25)));
+//		methods.add(new AvoidByRandomPoint(PlaneIndex.PLANE_ONE, new Point2D.Double(75, 25)));
+//		methods.add(new AvoidByRandomPoint(PlaneIndex.PLANE_ONE, new Point2D.Double(25, 75)));
+//		methods.add(new AvoidByRandomPoint(PlaneIndex.PLANE_ONE, new Point2D.Double(75, 75)));
 		
 		return methods;
 	}
