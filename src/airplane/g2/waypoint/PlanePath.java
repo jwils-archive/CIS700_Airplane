@@ -154,7 +154,7 @@ public class PlanePath {
 		int segment = 0;
 		
 		double distance = waypoints.get(segment).distance(waypoints.get(segment + 1));
-		while(savedTime + distance + 0.5 < timestep && segment < waypoints.size() - 2) {
+		while(savedTime + distance + 1.5 < timestep && segment < waypoints.size() - 2) {
 			savedTime += distance;
 			segment++;
 			distance = waypoints.get(segment).distance(waypoints.get(segment + 1));
