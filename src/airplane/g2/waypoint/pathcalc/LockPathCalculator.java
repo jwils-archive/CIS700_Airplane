@@ -12,7 +12,6 @@ import airplane.g2.waypoint.PlanePath;
 import airplane.g2.waypoint.WaypointSimulationResult;
 import airplane.g2.waypoint.avoidance.AvoidByDelay;
 import airplane.g2.waypoint.avoidance.AvoidByMove;
-import airplane.g2.waypoint.avoidance.AvoidByMoveEarlierArrival;
 import airplane.g2.waypoint.avoidance.AvoidMethod;
 import airplane.g2.waypoint.avoidance.AvoidMethod.PlaneIndex;
 import airplane.sim.Plane;
@@ -21,16 +20,36 @@ public class LockPathCalculator extends SimplePathCalculator {
 	private Boolean planeIsLocked[] = null;
 	private HashMap<Plane, PlanePath> waypointHash;
 	
+	public LockPathCalculator() {
+		simulationUpdateLimit = 1000;
+	}
+	
 	public void calculatePaths(HashMap<Plane, PlanePath> waypointHash) {
 		this.waypointHash = waypointHash;
 		Boolean wasSuccessful = false;
-		for(int x = 0, limit = 100; !wasSuccessful && x < limit; x ++) {
+		for(int x = 0, limit = 20; !wasSuccessful && x < limit; x ++) {
 			unlockPaths();
 			wasSuccessful = modifyHashLockingFromLatestToEarliest();
+			// try to delay unlocked planes
+			if(!wasSuccessful) {
+				wasSuccessful = delayUnlockedPlanes();
+			}
 		}
 		if(!wasSuccessful) {
 			logger.error("Paths will crash.");
 		}
+	}
+	
+	protected Boolean delayUnlockedPlanes() {
+		ArrayList<PlanePath> unlocked = getUnlockedPaths();
+		for(PlanePath path: unlocked) {
+			if(delayPlanePathUntilSimulationSuccess(path)) {
+				lockPath(path);
+			} else {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	protected void unlockPaths() {
@@ -44,6 +63,17 @@ public class LockPathCalculator extends SimplePathCalculator {
 	
 	protected ArrayList<PlanePath> getPlanePaths() {
 		return PlaneUtil.planePathsSortedByIndex(new ArrayList<PlanePath>(waypointHash.values()));
+	}
+	
+	protected ArrayList<PlanePath> getUnlockedPaths() {
+		ArrayList<PlanePath> lockedPaths = new ArrayList<PlanePath>();
+		ArrayList<PlanePath> paths = getPlanePaths();
+		for(int i = 0, size = planeIsLocked.length; i < size; i ++) {
+			if(!pathIsLockedAt(i)) {
+				lockedPaths.add(paths.get(i));
+			}
+		}
+		return lockedPaths;
 	}
 	
 	protected ArrayList<PlanePath> getLockedPaths() {
@@ -94,11 +124,38 @@ public class LockPathCalculator extends SimplePathCalculator {
 		
 		WaypointSimulationResult result = collidePlanePaths(getPlanePaths());
 		if(!result.isSuccess()) {
-			logger.error("Something went wrong with the simulation.");
+			ArrayList<PlanePath> unlockedPaths = getUnlockedPaths();
+			logger.error(String.format("Something went wrong with the simulation. There are %d unlocked paths.", unlockedPaths.size()));
+			
+			WaypointSimulationResult lockedResult = collidePlanePaths(getLockedPaths());
+			if(!lockedResult.isSuccess()) {
+				logger.error("Crashes exist with locked paths.");
+			}
+			
 			return false;
 		}
 		
 		return true;
+	}
+	
+	protected Boolean delayPlanePathUntilSimulationSuccess(PlanePath path) {
+		ArrayList<PlanePath> paths = newListWith(getLockedPaths(), path);
+	
+		int i = 0;
+		int delay = 10;
+		int limit = 20;
+		WaypointSimulationResult result;
+		do {
+			path.delay(delay);
+			result = collidePlanePaths(paths);
+			i++;
+		} while (!result.isSuccess() && i < limit);
+		
+		if(!result.isSuccess()) {
+			logger.error("Could not delay plane enough");
+		}
+		
+		return result.isSuccess();
 	}
 	
 	protected ArrayList<PlanePath> newListWith(ArrayList<PlanePath> paths, PlanePath add) {
@@ -220,6 +277,19 @@ public class LockPathCalculator extends SimplePathCalculator {
 		return methods;
 	}
 	
+	protected Double avoidResultHeuristicValue(AvoidResult r) {
+		// we want the heuristic to be greater the better it is
+		double adjustedSteps = 100-slowestArrivalStep(r.getPaths());
+		// bonus points if we don't crash
+		int noCrashFactor = 250;
+		int globalCollisionCrashFactor = r.getNextGlobalCollision() == null ? 200 : 0;
+		if(r.getNextCollision() != null) { 
+			noCrashFactor = 0;
+		}
+		
+		return adjustedSteps + noCrashFactor + globalCollisionCrashFactor; 
+	}
+	
 	public ArrayList<AvoidMethod> getAvoidMethods() {
 		ArrayList<AvoidMethod> methods = new ArrayList<AvoidMethod>();
 	
@@ -227,6 +297,7 @@ public class LockPathCalculator extends SimplePathCalculator {
 		methods.addAll(getCompassMoveMethodsOfMagnitude(20));
 		methods.addAll(getCompassMoveMethodsOfMagnitude(10));
 		methods.addAll(getCompassMoveMethodsOfMagnitude(15));
+		methods.addAll(getCompassMoveMethodsOfMagnitude(50));
 		
 		for(PlaneIndex index: new PlaneIndex[]{PlaneIndex.PLANE_ONE}) {
 			for(int delay: new int[]{10, 20, 30, 50, 100, 200}) {

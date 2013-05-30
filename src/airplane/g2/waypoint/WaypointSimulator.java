@@ -17,8 +17,13 @@ public class WaypointSimulator extends Simulator {
 		setWaypointHash(waypointHash);
 	}
 	
+	public WaypointSimulator(HashMap<Plane, PlanePath> waypointHash, int updateLimit) {
+		this(waypointHash);
+		setUpdateCount(updateLimit);
+	}
+	
 	public WaypointSimulationResult startWaypointSimulation(int round) {
-		updateCount = 0;
+		setUpdateCount(0);
 		SimulationResult result = startSimulation(getPlanesByIndex(), round);
 		WaypointSimulationResult waypointResult = new WaypointSimulationResult(result);
 		waypointResult.setWaypointHash(waypointHash);
@@ -35,8 +40,8 @@ public class WaypointSimulator extends Simulator {
 	}
 	
 	protected double[] simulateUpdate(ArrayList<Plane> planes, int round, double[] bearings) {
-		updateCount ++;
-		if(updateCount > 1000) continueSimulation = false;
+		setUpdateCount(getUpdateCount() + 1);
+		if(getUpdateCount() > 1000) continueSimulation = false;
 		
 		ArrayList<Plane> canonicalPlanes = getPlanesByIndex();
 		
@@ -65,5 +70,13 @@ public class WaypointSimulator extends Simulator {
 	}
 	public void setWaypointHash(HashMap<Plane, PlanePath> waypointHash) {
 		this.waypointHash = waypointHash;
+	}
+
+	public int getUpdateCount() {
+		return updateCount;
+	}
+
+	public void setUpdateCount(int updateCount) {
+		this.updateCount = updateCount;
 	}
 }

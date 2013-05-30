@@ -25,6 +25,7 @@ import airplane.sim.Plane;
 public class SimplePathCalculator extends PathCalculator{
 	protected Logger logger = Logger.getLogger(this.getClass());
 	protected ArrayList<AvoidMethod> avoidMethodsUsed = null;
+	protected int simulationUpdateLimit = 100;
 	
 	//TODO Better method of adding waypoint.
 	@Override
@@ -35,7 +36,7 @@ public class SimplePathCalculator extends PathCalculator{
 	
 	protected void modifyHashWithAvoidanceSchemes(HashMap<Plane, PlanePath> waypointHash) {
 		avoidMethodsUsed = new ArrayList<AvoidMethod>();
-		int x = 0, limit = 100;
+		int x = 0, limit = 1000;
 		for(; x < limit; x++) {
 			// always simulate from the beginning
 			WaypointSimulationResult result = simulationResultWithHash(waypointHash);
@@ -69,7 +70,7 @@ public class SimplePathCalculator extends PathCalculator{
 	}
 	
 	protected WaypointSimulationResult simulationResultWithHash(HashMap<Plane, PlanePath> waypointHash) {
-		return new WaypointSimulator(waypointHash).startWaypointSimulation(0);
+		return new WaypointSimulator(waypointHash, simulationUpdateLimit).startWaypointSimulation(0);
 	}
 	
 	protected void insertDelayForSimulationResult(WaypointSimulationResult result, ArrayList<PlanePath> paths) {
@@ -86,7 +87,7 @@ public class SimplePathCalculator extends PathCalculator{
 	}
 	
 	protected WaypointSimulationResult simulate(HashMap<Plane, PlanePath> waypointHash) {
-		WaypointSimulator sim = new WaypointSimulator(waypointHash);
+		WaypointSimulator sim = new WaypointSimulator(waypointHash, simulationUpdateLimit);
 		return sim.startWaypointSimulation(0);
 	}
 	
@@ -234,7 +235,7 @@ public class SimplePathCalculator extends PathCalculator{
 			ArrayList<PlanePath> paths) {		
 		// run the simulation only with the passed paths
 		HashMap<Plane, PlanePath> hash = PlaneUtil.waypointMapWithPaths(paths);
-		WaypointSimulationResult result = new WaypointSimulator(hash).startWaypointSimulation(0);
+		WaypointSimulationResult result = new WaypointSimulator(hash, simulationUpdateLimit).startWaypointSimulation(0);
 		return result;
 	}
 	
