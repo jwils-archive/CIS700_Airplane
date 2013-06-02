@@ -175,9 +175,8 @@ public class LockPathCalculator extends SimplePathCalculator {
 	
 		int i = 0;
 		int delay = 2;
-		int limit = 10;
+		int limit = 50;
 		WaypointSimulationResult result;
-		path.delay(10);
 		do {
 			path.delay(delay);
 			result = collidePlanePaths(paths);
