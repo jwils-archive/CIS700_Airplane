@@ -53,11 +53,12 @@ public class WaypointSimulator extends Simulator {
 			PlanePath path = waypointHash.get(canonicalPlanes.get(i));
 			double newBearing = path.getBearing(plane, round);
 			
-			if (bearings[i] >= 0 && Math.abs(newBearing - bearings[i]) > 9.5) {
+			double adjust = 9.99;
+			if (bearings[i] >= 0 && Math.abs(newBearing - bearings[i]) > adjust) {
 				if ( (newBearing > bearings[i] && newBearing - bearings[i] < 180) || (newBearing < bearings[i] && newBearing - bearings[i] > 180)) {
-					bearings[i] = (bearings[i] + 9.5) % 360;
+					bearings[i] = (bearings[i] + adjust) % 360;
 				} else {
-					bearings[i] = (bearings[i] - 9.5 + 360) % 360;
+					bearings[i] = (bearings[i] - adjust + 360) % 360;
 				}
 			} else {
 				bearings[i] = newBearing;

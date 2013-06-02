@@ -38,7 +38,8 @@ public class LockPathCalculator extends SimplePathCalculator {
 			}
 		}
 		if(!wasSuccessful) {
-			logger.error("Paths will crash.");
+			logger.error("Paths will crash, implement delays.");
+			insertDelaysUntilNoCrash(waypointHash, 1000);
 		}
 	}
 	
@@ -156,7 +157,7 @@ public class LockPathCalculator extends SimplePathCalculator {
 		WaypointSimulationResult result = collidePlanePaths(getPlanePaths());
 		if(!result.isSuccess()) {
 			ArrayList<PlanePath> unlockedPaths = getUnlockedPaths();
-			logger.error(String.format("Something went wrong with the simulation. There are %d unlocked paths.", unlockedPaths.size()));
+			logger.error(String.format("Not all paths could be locked. There are %d unlocked paths.", unlockedPaths.size()));
 			
 			WaypointSimulationResult lockedResult = collidePlanePaths(getLockedPaths());
 			if(!lockedResult.isSuccess()) {
@@ -178,13 +179,13 @@ public class LockPathCalculator extends SimplePathCalculator {
 		WaypointSimulationResult result;
 		path.delay(10);
 		do {
-			path.delay(2);
+			path.delay(delay);
 			result = collidePlanePaths(paths);
 			i++;
 		} while (!result.isSuccess() && i < limit);
 		
 		if(!result.isSuccess()) {
-			logger.error("Could not delay plane enough");
+			logger.error(String.format("Could not delay plane enough in %d tries of delay %d", limit, delay));
 		}
 		
 		return result.isSuccess();
@@ -244,6 +245,7 @@ public class LockPathCalculator extends SimplePathCalculator {
 				adjustedPaths = method.avoid(modifyPath, lockedPath, initialResult.getCollision());
 			} catch(Exception ex) {
 				logger.error(ex.toString());
+				continue;
 			}
 			PlanePath adjustedPath = adjustedPaths[0];
 			

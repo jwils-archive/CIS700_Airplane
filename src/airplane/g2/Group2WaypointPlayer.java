@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import org.apache.log4j.Logger;
 
+import airplane.g2.util.PlaneUtil;
 import airplane.g2.waypoint.PlanePath;
 import airplane.g2.waypoint.pathcalc.LockPathCalculator;
 import airplane.g2.waypoint.pathcalc.PathCalculator;
@@ -42,14 +43,27 @@ public class Group2WaypointPlayer extends airplane.sim.Player {
 			if (bearings[i] == -2) continue;
 			PlanePath path = waypointHash.get(planes.get(i));
 			double newBearing = path.getBearing(round);
+			
+			// override the bearing if it has been going for more than 1000 cycles and
+			// it is very close to the destination
+			Plane p = path.getPlane();
+			if(round - p.getDepartureTime() > 500 &&
+					PlaneUtil.distanceToDestination(path.getPlane()) < 5) {
+				logger.info(String.format("Overriding plane %f from destination", PlaneUtil.distanceToDestination(path.getPlane())));
+				newBearing = PlaneUtil.normalizedBearing(
+						calculateBearing(p.getLocation(), p.getDestination()));
+			}
+			
+			
 //			if (waypointHash.get(planes.get(i)).getPosition(1).x > 70 &&  waypointHash.get(planes.get(i)).getPosition(1).y > 70) {
 //				logger.error("Bearing should be =" + newBearing + " at round " + round);
 //			}
-			if (bearings[i] >= 0 && Math.abs(newBearing - bearings[i]) > 9.5) {
+			double adjust = 9.99;
+			if (bearings[i] >= 0 && Math.abs(newBearing - bearings[i]) > adjust) {
 				if ( (newBearing > bearings[i] && newBearing - bearings[i] < 180) || (newBearing < bearings[i] && newBearing - bearings[i] > 180)) {
-					bearings[i] = (bearings[i] + 9.5) % 360;
+					bearings[i] = (bearings[i] + adjust) % 360;
 				} else {
-					bearings[i] = (bearings[i] - 9.5 + 360) % 360;
+					bearings[i] = (bearings[i] - adjust + 360) % 360;
 				}
 			} else {
 				bearings[i] = newBearing;
