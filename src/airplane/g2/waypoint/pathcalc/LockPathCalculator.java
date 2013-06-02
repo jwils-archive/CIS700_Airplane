@@ -39,7 +39,7 @@ public class LockPathCalculator extends SimplePathCalculator {
 		}
 		if(!wasSuccessful) {
 			logger.error("Paths will crash, implement delays.");
-			insertDelaysUntilNoCrash(waypointHash, 1000);
+			insertDelaysUntilNoCrash(waypointHash, 10000);
 		}
 	}
 	

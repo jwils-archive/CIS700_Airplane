@@ -65,7 +65,7 @@ public class SimplePathCalculator extends PathCalculator{
 			insertDelayForSimulationResult(result, paths); 
 		}
 		if(x == limit) {
-			logger.warn("Could not delay planes successfully. There will be an unavoidable crash.");
+			logger.warn("Could not delay _all_ planes successfully. There will be an unavoidable crash.");
 		}
 	}
 	
